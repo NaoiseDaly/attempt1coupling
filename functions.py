@@ -5,8 +5,65 @@ import logging
 logger = logging.getLogger(__name__)
 from time import perf_counter
 from scipy.stats import norm, uniform
+from pandas import DataFrame
 
+def coupled_MCMC1( max_t_iterations=10**3):
+    """simulate a normal with a hardcoded mean and sd"""
 
+    #start timing here
+    start_time = perf_counter()
+
+    x_chain = np.zeros(max_t_iterations)
+    y_chain = np.zeros(max_t_iterations)
+    x_t, y_t = -5, 5
+    x_chain[0], y_chain[0] = x_t, y_t
+
+    def log_alpha(current, new):
+        """log of the alpha probability of accepting a proposed move.
+        Here the proposal dist is symmetric and the target is N(3,4)        
+        """
+        mu = 3
+        sigma_squared = 4
+        r = (current - new)*( current+new- 2*mu )/(2*sigma_squared)
+        return min(0, r )
+
+    #conscicously using common random numbers
+    log_unif_rvs = np.log(uniform.rvs(size = max_t_iterations))
+    for t in range(1, max_t_iterations):
+        #propose a move from maximal coupling
+        #here Q(X_t,.) is normal centered on X_t with sd 1
+        proposed_x, proposed_y = max_coupling_algo1(
+            norm(x_t, 1).logpdf, norm(y_t, 1).logpdf,
+            norm(x_t, 1).rvs, norm(y_t, 1).rvs
+        )
+        
+        #sample a uniform and take log
+        log_u = log_unif_rvs[t]
+        
+        logger.info(
+            f"{log_u=:.2} {proposed_y=:.1f} {log_alpha(y_t, proposed_y)=:.2f}"
+            +"\n\t\t"+
+            f"{log_u=:.2} {proposed_x=:.1f} {log_alpha(x_t, proposed_x)=:.2f}"
+        )
+        #decide if each chain accepts or rejects the move 
+        if log_u <= log_alpha(x_t, proposed_x):
+            x_chain[t] = proposed_x
+        else:
+            x_chain[t] = x_t
+        
+        if log_u <= log_alpha(y_t, proposed_y):
+            y_chain[t] = proposed_y
+        else:
+            y_chain[t] = y_t
+
+    #end timing now
+    end_time = perf_counter()
+    #record timing
+    logger.info(
+        f"chain took {round(end_time-start_time,3)} secs to simulate {max_t_iterations} iterations"
+    )
+
+    return DataFrame({"X":x_chain, "Y":y_chain})
 
 
 def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
@@ -18,6 +75,7 @@ def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
     new_X = p_sampler()
     u  = uniform.rvs()
     if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
+        logger.info(f"meeting {new_X:.2f}")
         return (new_X, new_X) # X=Y
     
     new_Y = None
