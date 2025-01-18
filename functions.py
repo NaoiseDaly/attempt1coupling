@@ -11,7 +11,8 @@ from scipy.stats import norm, uniform
 
 def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
     """
-    Sampling from a maximal coupling of x ~ p and y ~ q, using Algorithm 1 from P.Jacob 2021
+    Sampling from a maximal coupling of x ~ p and y ~ q
+    , using Chp3 Algorithm 1 from P.Jacob 2021
     
     """
     new_X = p_sampler()
