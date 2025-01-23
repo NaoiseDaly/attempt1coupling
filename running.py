@@ -38,8 +38,9 @@ N = 2000
 # plt.show()
 
 """Doing coupled MCMC with a lag"""
-N = 200
-c_sample = coupled_MCMC2(lag = 20,max_t_iterations= 100)
+N, L = 500, 200
+c_sample = coupled_MCMC2(lag = L,max_t_iterations= N)
 
-trace_plot(c_sample)
+trace_plot(c_sample, L, 453)
 print_basic_df_summary(c_sample)
+print_basic_df_summary(c_sample.iloc[((N-L)//5)+L:])

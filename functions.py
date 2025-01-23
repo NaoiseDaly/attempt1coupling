@@ -21,7 +21,7 @@ def coupled_MCMC2(lag:int,  max_t_iterations=10**3):
     #initialisation
     x_chain = np.zeros(max_t_iterations)
     y_chain = np.zeros(max_t_iterations)
-    x_chain[0], y_chain[0] = -5, 5
+    x_chain[0], y_chain[0] = -100, 100
     log_unifs = np.log(uniform.rvs(size = max_t_iterations+1)) #theres one spare here just to keep indexing simple
 
     
@@ -193,13 +193,20 @@ def plot_joint_marginal(df, x_label = "X", y_label = "Y"):
     z.plot_marginals(sns.histplot, kde = True, color = "r")
     plt.show()
 
-def trace_plot(sample, meeting_time = None ):
-    fig, ax1, ax2 = plt.subplots(ncols= 2)
+def trace_plot(sample, lag, meeting_time = None):
 
+    fig, (ax1, ax2) = plt.subplots(ncols= 2)
+    
+    shifted_y = np.roll(sample["Y"], lag) # move the NAs from the end to the start
+    ax2.plot(sample["X"],  "r")
+    ax2.plot(shifted_y,  "b")
+    ax2.set_xlabel("t + lag")
+
+    if meeting_time:
+        ax2.axvline(x = meeting_time, ls = "dashed", color = "blue")
+    
     ax1.plot(sample["X"],  "r")
     ax1.plot(sample["Y"],  "b")
-    ax1.set_xlabel("iteration")
-
-    shifted_y = 
+    ax1.set_xlabel("t")
 
     plt.show()
