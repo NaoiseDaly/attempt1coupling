@@ -11,6 +11,50 @@ def print_basic_df_summary(df):
     """helper function that prints the mean, std of a dataframe"""
     print( df.apply(["mean", "std"]).agg(round, 0, 2) )
 
+def coupled_MCMC2(lag:int,  max_t_iterations=10**3):
+    """
+    coupling with a lag
+    target a normal with a hardcoded mean and sd"""
+        #start timing here
+    start_time = perf_counter()
+
+    #initialisation
+    x_chain = np.zeros(max_t_iterations+lag)
+    y_chain = np.zeros(max_t_iterations)
+    x_chain[0], y_chain[0] = -5, 5
+    
+        
+    def proposal_dist_logpdf(current_state):
+        return norm(current_state, 1).logpdf
+    def proposal_dist_sampler(current_state):
+        return norm(current_state, 1).rvs
+
+
+    def log_alpha(current, new):
+        """log of the alpha probability of accepting a proposed move.
+        Here the proposal dist is symmetric and the target is N(3,4)        
+        """
+        mu = 3
+        sigma_squared = 4   
+        r = (current - new)*( current+new- 2*mu )/(2*sigma_squared)
+        return min(0, r )
+    
+    # run X chain for lag steps
+    log_unifs = np.log(uniform.rvs(size = lag+1))
+    for t in range(1,lag+1):
+        current_state = x_chain[t-1]
+        proposed_state = proposal_dist_sampler(current_state)() # looks ugly i know
+
+        if log_unifs[t] <= log_alpha(current_state, proposed_state):
+            x_chain[t] = proposed_state
+        else:
+            x_chain[t] = current_state
+    
+    # now run a coupling with the lagged chains
+        
+
+
+
 def coupled_MCMC1( max_t_iterations=10**3):
     """simulate a normal with a hardcoded mean and sd"""
 
