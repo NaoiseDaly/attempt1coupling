@@ -19,9 +19,11 @@ def coupled_MCMC2(lag:int,  max_t_iterations=10**3):
     start_time = perf_counter()
 
     #initialisation
-    x_chain = np.zeros(max_t_iterations+lag)
+    x_chain = np.zeros(max_t_iterations)
     y_chain = np.zeros(max_t_iterations)
     x_chain[0], y_chain[0] = -5, 5
+    log_unifs = np.log(uniform.rvs(size = max_t_iterations+1)) #theres one spare here just to keep indexing simple
+
     
         
     def proposal_dist_logpdf(current_state):
@@ -40,7 +42,6 @@ def coupled_MCMC2(lag:int,  max_t_iterations=10**3):
         return min(0, r )
     
     # run X chain for lag steps
-    log_unifs = np.log(uniform.rvs(size = lag+1))
     for t in range(1,lag+1):
         current_state = x_chain[t-1]
         proposed_state = proposal_dist_sampler(current_state)() # looks ugly i know
@@ -50,7 +51,45 @@ def coupled_MCMC2(lag:int,  max_t_iterations=10**3):
         else:
             x_chain[t] = current_state
     
+    meeting_time = None
     # now run a coupling with the lagged chains
+    for t in range(lag+1, max_t_iterations):
+        current_x = x_chain[t-1]
+        current_y = y_chain[t-lag-1] #fingers crossed
+
+        proposed_x, proposed_y = max_coupling_algo1(
+            proposal_dist_logpdf(current_x), proposal_dist_logpdf(current_y),
+            proposal_dist_sampler(current_x), proposal_dist_sampler(current_y)
+        )
+
+        log_u = log_unifs[t] # common random numbers
+
+        if log_u <= log_alpha(current_x, proposed_x):
+            x_chain[t] = proposed_x
+        else:
+            x_chain[t] = current_x
+
+        if log_u <= log_alpha(current_y, proposed_y):
+            y_chain[t-lag] = proposed_y
+        else:
+            y_chain[t-lag] = current_y
+
+        if not meeting_time and y_chain[t-lag] == x_chain[t]:
+            meeting_time = t
+            logger.info(
+                f"{meeting_time=} {x_chain[t]:.2f}"
+            )
+
+    y_chain[max_t_iterations-lag:] = np.nan
+
+    #end timing now
+    end_time = perf_counter()
+    #record timing
+    logger.info(
+        f"chain took {round(end_time-start_time,3)} secs to simulate {max_t_iterations} iterations"
+    )
+
+    return DataFrame({"X":x_chain, "Y":y_chain})
         
 
 
@@ -152,4 +191,15 @@ def plot_joint_marginal(df, x_label = "X", y_label = "Y"):
     z = sns.JointGrid(df, x = x_label, y = y_label)
     z.plot_joint(sns.scatterplot)
     z.plot_marginals(sns.histplot, kde = True, color = "r")
+    plt.show()
+
+def trace_plot(sample, meeting_time = None ):
+    fig, ax1, ax2 = plt.subplots(ncols= 2)
+
+    ax1.plot(sample["X"],  "r")
+    ax1.plot(sample["Y"],  "b")
+    ax1.set_xlabel("iteration")
+
+    shifted_y = 
+
     plt.show()
