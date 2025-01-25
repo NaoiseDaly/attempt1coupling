@@ -4,14 +4,15 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 logging.basicConfig( level=logging.INFO)
 from scipy.stats import norm
+from generate_tau_samples import modified_coupled_MCMC2
 np.random.seed(1345301)
 
 """looking at the maximal coupling algorithm on its own"""
-sample = [
-    max_coupling_algo1(norm(5,3).logpdf, norm(10,1).logpdf, norm(5,3).rvs, norm(10,1).rvs)
-    for _ in range(200)]
-df = pd.DataFrame({"X":[pair[0] for pair in sample],
-                   "Y":[ pair[1] for pair in sample]})
+# sample = [
+#     max_coupling_algo1(norm(5,3).logpdf, norm(10,1).logpdf, norm(5,3).rvs, norm(10,1).rvs)
+#     for _ in range(200)]
+# df = pd.DataFrame({"X":[pair[0] for pair in sample],
+#                    "Y":[ pair[1] for pair in sample]})
 
 
 # just_plot_it(df["X"], df["Y"])
@@ -38,9 +39,17 @@ N = 2000
 # plt.show()
 
 """Doing coupled MCMC with a lag"""
-N, L = 500, 200
-c_sample = coupled_MCMC2(lag = L,max_t_iterations= N)
+N, L = 600, 200
+# c_sample = coupled_MCMC2(lag = L,max_t_iterations= N)
 
-trace_plot(c_sample, L, 453)
-print_basic_df_summary(c_sample)
-print_basic_df_summary(c_sample.iloc[((N-L)//5)+L:])
+# trace_plot(c_sample, L, 453)
+# print_basic_df_summary(c_sample)
+# print_basic_df_summary(c_sample.iloc[((N-L)//5)+L:])
+
+
+big_thing_of_results = DataFrame()
+seed = 10101010
+for seed in range(seed, seed + 5):
+    tau, c_sample = modified_coupled_MCMC2(L,N, random_state  = seed)
+    # print(tau)
+    # trace_plot(c_sample,L, tau)
