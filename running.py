@@ -4,7 +4,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 logging.basicConfig( level=logging.INFO)
 from scipy.stats import norm
-from generate_tau_samples import modified_coupled_MCMC2, sample_tau_L, sample_tau_L_for_many_lags
+from generate_tau_samples import modified_coupled_MCMC2, sample_tau_L_for_many_lags
 np.random.seed(1345301)
 
 """looking at the maximal coupling algorithm on its own"""
