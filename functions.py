@@ -36,6 +36,11 @@ def save_df_with_timestamp(df, msg = "data"):
     f_name = msg + make_timestamp() +".csv"
     f_path = os.path.join(target_dir, f_name)
 
+    if not os.path.exists(target_dir):
+        #sometimes the logging folder mightnt be on the remote machine
+        os.mkdir(target_dir)
+
+
     df.to_csv(f_path, index =False)
 
 
