@@ -20,10 +20,11 @@ def sample_tau_L_for_many_lags(lags:iter, num_tau_samples  =5, max_t_iterations 
             for r in range(starting_random_seed, starting_random_seed + num_tau_samples)
         ]
     
+    end_time = perf_counter()
     logger.info(
         f"\t\t {round(end_time-start_time,1)} secs  "
     )
-    end_time = perf_counter()
+    
 
     return df
 
@@ -103,8 +104,8 @@ def modified_coupled_MCMC2(lag:int, max_t_iterations=10**3, random_state = None)
     #end timing now
     end_time = perf_counter()
     #record timing
-    logger.info(
-        f"{random_state=} \t {round(end_time-start_time,1)} secs  {t} iterations, tau {meeting_time}"
-    )
+    # logger.info(
+    #     f"{random_state=} \t {round(end_time-start_time,1)} secs  {t} iterations, tau {meeting_time}"
+    # )
 
     return meeting_time
