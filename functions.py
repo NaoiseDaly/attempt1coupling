@@ -8,6 +8,23 @@ from scipy.stats import norm, uniform
 from pandas import DataFrame
 import os 
 
+def estimate_TV_upper(lag, taus,ts):
+    """
+    MC estimate the function `max(0, (tau-lag-t)/lag )` for given `t`s using sampled `taus`
+    """
+    ests = np.zeros((len(taus), len(ts)))
+
+    # for each sample compute the function
+    for i, tau in enumerate(taus):
+        
+        #gives back an array - the func applied to many t for one tau
+        ests[i] = np.maximum.reduce([#an element-wise max of two arrays - one all zeros
+            np.zeros(ts.shape), (tau-lag-ts)/lag #max(0, tau)
+                ] )
+                    
+    return ests.mean(0) #an average of the individual realisations of the upper bound
+        
+
 def make_timestamp():
     """makes a timestamp of roughly right now ( to the minute) as a string"""
     import datetime
@@ -105,8 +122,6 @@ def coupled_MCMC2(lag:int,  max_t_iterations=10**3):
     )
 
     return DataFrame({"X":x_chain, "Y":y_chain})
-        
-
 
 
 def coupled_MCMC1( max_t_iterations=10**3):
