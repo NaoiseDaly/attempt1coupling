@@ -53,3 +53,5 @@ results_df = sample_tau_L_for_many_lags(
 print_basic_df_summary(results_df)
 plt.boxplot(results_df, tick_labels = results_df.columns)
 plt.show()
+
+save_df_with_timestamp(results_df)
