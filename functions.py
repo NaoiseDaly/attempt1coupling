@@ -6,6 +6,21 @@ logger = logging.getLogger(__name__)
 from time import perf_counter
 from scipy.stats import norm, uniform
 from pandas import DataFrame
+import os 
+
+def make_timestamp():
+    """makes a timestamp of roughly right now ( to the minute) as a string"""
+    import datetime
+    return '{:%Y-%m-%d %a %H-%M}'.format(datetime.datetime.now())
+
+def save_df_with_timestamp(df, msg = "data"):
+    """write a dataframe to a csv file with a timestamp and `msg`"""
+    target_dir = os.path.join(os.getcwd(), "logs_and_data")
+    f_name = msg + make_timestamp() +".csv"
+    f_path = os.path.join(target_dir, f_name)
+
+    df.to_csv(f_path, index =False)
+
 
 def print_basic_df_summary(df):
     """helper function that prints the mean, std of a dataframe"""
