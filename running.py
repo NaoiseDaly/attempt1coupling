@@ -49,3 +49,5 @@ N, L = 600, 200
 
 results_df = sample_tau_L_for_many_lags([100*i for i in range(3,9)])
 print_basic_df_summary(results_df)
+plt.boxplot(results_df, tick_labels = results_df.columns)
+plt.show()
