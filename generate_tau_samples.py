@@ -22,7 +22,7 @@ def sample_tau_L_for_many_lags(lags:iter, num_tau_samples  =5, max_t_iterations 
     
     end_time = perf_counter()
     logger.info(
-        f"\t\t getting {num_tau_samples} of tau at lag {l} took {round(end_time-start_time,1)} secs  "
+        f"\t\t getting {num_tau_samples*len(lags):,} of tau took {round(end_time-start_time,1)} secs  "
     )
 
     return df
