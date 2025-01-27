@@ -47,7 +47,7 @@ def save_df_with_timestamp(df, msg = "data"):
 
     return f_name
 
-def estimate_TV_from_file(f_name, f_folder = "logs_and_data", save_msg = "TV est"):
+def estimate_TV_from_file(f_name,num_ts = 100, f_folder = "logs_and_data", save_msg = "TV est"):
     """
     estimates the TV upper bound per lag from tau_lag estimates in a file
     looks for the file `f_name` in `f_folder`
@@ -57,6 +57,7 @@ def estimate_TV_from_file(f_name, f_folder = "logs_and_data", save_msg = "TV est
     f_path = os.path.join(f_folder, f_name)
     df = pd.read_csv(f_path)
 
+    ts = np.array(range(1, num_ts))
     tv_estimates = df.apply(lambda x : estimate_TV_upper(int(x.name), df[x.name], ts)
              , axis = 0)
 
