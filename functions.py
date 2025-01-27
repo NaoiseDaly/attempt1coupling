@@ -37,7 +37,7 @@ def save_df_with_timestamp(df, msg = "data"):
     f_path = os.path.join(target_dir, f_name)
 
     if not os.path.exists(target_dir):
-        #sometimes the logging folder mightnt be on the remote machine
+        #sometimes the logging folder mightn't be on the remote machine
         os.mkdir(target_dir)
 
 
