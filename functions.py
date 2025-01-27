@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 from time import perf_counter
 from scipy.stats import norm, uniform
 from pandas import DataFrame
+import pandas as pd
 import os 
 
 def estimate_TV_upper(lag, taus,ts):
@@ -43,6 +44,22 @@ def save_df_with_timestamp(df, msg = "data"):
 
     df.to_csv(f_path, index =False)
 
+def estimate_TV_from_file(f_name, f_folder = "logs_and_data", save_msg = "TV est"):
+    """
+    estimates the TV upper bound per lag from tau_lag estimates in a file
+    looks for the file `f_name` in `f_folder`
+
+    Saves the estimates in a timestamped file with `save_msg` and returns them
+    """
+    f_path = os.path.join(f_folder, f_name)
+    df = pd.read_csv(f_path)
+
+    tv_estimates = df.apply(lambda x : estimate_TV_upper(int(x.name), df[x.name], ts)
+             , axis = 0)
+
+    save_df_with_timestamp(tv_estimates, save_msg)
+
+    return tv_estimates
 
 def print_basic_df_summary(df):
     """helper function that prints the mean, std of a dataframe"""
