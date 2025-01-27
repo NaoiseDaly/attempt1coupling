@@ -32,7 +32,9 @@ def make_timestamp():
     return '{:%Y-%m-%d %a %H-%M}'.format(datetime.datetime.now())
 
 def save_df_with_timestamp(df, msg = "data"):
-    """write a dataframe to a csv file with a timestamp and `msg`"""
+    """write a dataframe to a csv file with a timestamp and `msg`
+    returns the filename
+    """
     target_dir = os.path.join(os.getcwd(), "logs_and_data")
     f_name = msg + make_timestamp() +".csv"
     f_path = os.path.join(target_dir, f_name)
@@ -41,8 +43,9 @@ def save_df_with_timestamp(df, msg = "data"):
         #sometimes the logging folder mightn't be on the remote machine
         os.mkdir(target_dir)
 
-
     df.to_csv(f_path, index =False)
+
+    return f_name
 
 def estimate_TV_from_file(f_name, f_folder = "logs_and_data", save_msg = "TV est"):
     """
