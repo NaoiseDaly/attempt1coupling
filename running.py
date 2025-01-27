@@ -48,10 +48,15 @@ N, L = 600, 200
 
 
 results_df = sample_tau_L_for_many_lags(
-    lags = [100*i for i in range(3,9)],
+    lags = [100*i for i in range(3,9)], 
     num_tau_samples = 5)
 print_basic_df_summary(results_df)
 plt.boxplot(results_df, tick_labels = results_df.columns)
 plt.show()
 
-save_df_with_timestamp(results_df)
+f = save_df_with_timestamp(results_df, "tau lag")
+
+tv_est = estimate_TV_from_file(f, 1000)
+
+plt.plot(tv_est)
+plt.show()
