@@ -36,7 +36,7 @@ def save_df_with_timestamp(df, msg = "data"):
     returns the filename
     """
     target_dir = os.path.join(os.getcwd(), "logs_and_data")
-    f_name = msg + make_timestamp() +".csv"
+    f_name = msg + " " + make_timestamp() +".csv"
     f_path = os.path.join(target_dir, f_name)
 
     if not os.path.exists(target_dir):
