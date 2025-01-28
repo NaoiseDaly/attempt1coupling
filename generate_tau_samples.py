@@ -15,10 +15,10 @@ def sample_tau_L_for_many_lags(lags:iter, num_tau_samples  =5, max_t_iterations 
  
     for l in lags:
         logger.info(f"\t\t getting {num_tau_samples} of tau at lag {l}")
-        df[l] = [
-            modified_coupled_MCMC2(lag = l, max_t_iterations = max_t_iterations, random_state = r) 
-            for r in range(starting_random_seed, starting_random_seed + num_tau_samples)
-        ]
+        arr = np.zeros( ( num_tau_samples))
+        for i, seed in enumerate( range(starting_random_seed, starting_random_seed + num_tau_samples)  ):
+            arr[i] = modified_coupled_MCMC2(l, max_t_iterations, seed) 
+        df[l] = arr
     
     end_time = perf_counter()
     logger.info(

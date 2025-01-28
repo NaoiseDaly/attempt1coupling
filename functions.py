@@ -15,21 +15,21 @@ def read_df_file(f_name):
     d = pd.read_csv(f, index_col = 0)
     return d
 
-def estimate_TV_upper(lag, taus,ts):
+def estimate_TV_upper(lag, taus, ts):
     """
-    MC estimate the function `max(0, (tau-lag-t)/lag )` for given `t`s using sampled `taus`
+    estimate the function `max(0, (tau-lag-t)/lag )` for given `ts` using the sampled `taus` at a specific `lag`
     """
     ests = np.zeros((len(taus), len(ts)))
 
-    # for each sample compute the function
+    # for each individual sample compute the function
     for i, tau in enumerate(taus):
         
         #gives back an array - the func applied to many t for one tau
         ests[i] = np.maximum.reduce([#an element-wise max of two arrays - one all zeros
-            np.zeros(ts.shape), (tau-lag-ts)/lag #max(0, tau)
+            np.zeros(ts.shape), (tau-lag-ts)/lag 
                 ] )
                     
-    return ests.mean(0) #an average of the individual realisations of the upper bound
+    return ests.mean(0) #an average of the individual realisations of the upper bound at each t
         
 
 def make_timestamp():
@@ -37,8 +37,9 @@ def make_timestamp():
     import datetime
     return '{:%Y-%m-%d %a %H-%M}'.format(datetime.datetime.now())
 
-def save_df_with_timestamp(df, msg = "data"):
-    """write a dataframe to a csv file with a timestamp and `msg`
+def save_df_with_timestamp(df:DataFrame, msg = "data"):
+    """write a dataframe to a csv file with a timestamp and `msg` into the logs_and_data folder.
+    
     returns the filename
     """
     target_dir = os.path.join(os.getcwd(), "logs_and_data")
@@ -56,14 +57,15 @@ def save_df_with_timestamp(df, msg = "data"):
 def estimate_TV_from_file(f_name,num_ts = 100, save_msg = "TV est"):
     """
     estimates the TV upper bound per lag from tau_lag estimates in a file
-    looks for the file `f_name` in `f_folder`
+    looks for the file `f_name` in logs_and_data folder
 
     Saves the estimates in a timestamped file with `save_msg` and returns them
     """
     df = read_df_file(f_name)
 
     ts = np.array(range(1, num_ts))
-    tv_estimates = df.apply(lambda x : estimate_TV_upper(int(x.name), df[x.name], ts)
+    # estimating func is applied along columns , lag stored in column name
+    tv_estimates = df.apply(lambda col : estimate_TV_upper(int(col.name), df[col.name], ts)
              , axis = 0)
 
     ests_f = save_df_with_timestamp(tv_estimates, save_msg)
