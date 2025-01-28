@@ -58,3 +58,15 @@ ax1.legend(tv_est.columns, title = "Lag")
 ax1.set_ylabel("TV upper bound")
 ax1.set_xlabel("time t")
 plt.show()
+
+d = pd.read_csv(os.path.join("logs_and_data","tau lag 2025-01-27 Mon 20-19.csv") )
+shifted = d.apply(lambda s:s -int(s.name), axis = 0)
+print_basic_df_summary(shifted)
+# fig , (ax1, ax2) = plt.subplots(2)
+# for c in d.columns:
+#     xs = d[c] -int(c) #tau - lag
+#     ax1.ecdf(xs, complementary  = False )
+#     ax2.boxplot(xs)
+# ax1.legend(d.columns, title = "lag")
+# ax1.set_yscale("log")
+# plt.show()
