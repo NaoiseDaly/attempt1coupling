@@ -11,7 +11,7 @@ print_basic_df_summary(tau_data)
 
 #save just in case
 tau_data_f = save_df_with_timestamp(tau_data, "tau lag")
-logger.info(f"saved TV ests as {tau_data_f}")
+logger.info(f"saved tau samples as {tau_data_f}")
 
 tv_data_f = estimate_TV_from_file(tau_data_f, num_ts = 500)
 logger.info(f"saved TV ests as {tv_data_f}")
