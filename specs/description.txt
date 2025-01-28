@@ -1,0 +1,9 @@
+
+    Initialise a pair of chains, run the x chain for L steps, then start running the coupling of chains until they meet at random iteration tau-l.
+    Do this multiple times to get samples of tau_L.
+    Calculate a Monte Carlo estimate of the TV upper bound and plot it as a function of the iteration index t = 0, 1, 2, …
+
+
+Then do this for an increasing sequence of lags until the upper bound curves stabilise. 
+
+An assumption of the approach is that the distribution of tau_L has geometric tails. We can verify this empirically by plotting: plot 1 - ECDF(tau_L), also known as the empirical complementary CDF (ECCDF), with the y-axis on the log scale, then geometric tails should appear as straight lines. To plot them on top of each other, make the x-axis in units of tau_L – L as in the attached plot 
