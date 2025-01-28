@@ -47,8 +47,9 @@ N, L = 600, 200
 # print_basic_df_summary(c_sample.iloc[((N-L)//5)+L:])
 
 #plot TV upper bound
-f = os.path.join("logs_and_data", "TV est2025-01-27 Mon 17-18.csv")
-tv_est = pd.read_csv(f)
+#  
+tv_est = read_df_file("TV est2025-01-27 Mon 17-18.csv")
+print(tv_est)
 
 fig , ax1 = plt.subplots(1)
 ax1.plot(tv_est)
