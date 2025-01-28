@@ -9,6 +9,12 @@ from pandas import DataFrame
 import pandas as pd
 import os 
 
+def read_df_file(f_name):
+    """convenience func that reads `f_name` in logs_and_data folder as a pandas Dataframe"""
+    f = os.path.join("logs_and_data", f)
+    d = pd.read_csv(f, index_col = 0)
+    return d
+
 def estimate_TV_upper(lag, taus,ts):
     """
     MC estimate the function `max(0, (tau-lag-t)/lag )` for given `t`s using sampled `taus`
@@ -43,7 +49,7 @@ def save_df_with_timestamp(df, msg = "data"):
         #sometimes the logging folder mightn't be on the remote machine
         os.mkdir(target_dir)
 
-    df.to_csv(f_path, index =False)
+    df.to_csv(f_path)
 
     return f_name
 
