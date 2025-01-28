@@ -46,17 +46,14 @@ N, L = 600, 200
 # print_basic_df_summary(c_sample)
 # print_basic_df_summary(c_sample.iloc[((N-L)//5)+L:])
 
+#plot TV upper bound
+f = os.path.join("logs_and_data", "TV est2025-01-27 Mon 17-18.csv")
+tv_est = pd.read_csv(f)
 
-results_df = sample_tau_L_for_many_lags(
-    lags = [100*i for i in range(3,9)], 
-    num_tau_samples = 100)
-print_basic_df_summary(results_df)
-plt.boxplot(results_df, tick_labels = results_df.columns)
-plt.show()
-
-f = save_df_with_timestamp(results_df, "tau lag")
-
-tv_est = estimate_TV_from_file(f, 500)
-
-plt.plot(tv_est)
+fig , ax1 = plt.subplots(1)
+ax1.plot(tv_est)
+ax1.set_title(f"TV upper bound")
+ax1.legend(tv_est.columns, title = "Lag")
+ax1.set_ylabel("TV upper bound")
+ax1.set_xlabel("time t")
 plt.show()
