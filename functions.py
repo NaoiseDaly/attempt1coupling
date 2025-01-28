@@ -11,7 +11,7 @@ import os
 
 def read_df_file(f_name):
     """convenience func that reads `f_name` in logs_and_data folder as a pandas Dataframe"""
-    f = os.path.join("logs_and_data", f)
+    f = os.path.join("logs_and_data", f_name)
     d = pd.read_csv(f, index_col = 0)
     return d
 
