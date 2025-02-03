@@ -26,7 +26,7 @@ def estimate_TV_upper(lag, taus, ts):
         
         #gives back an array - the func applied to many t for one tau
         ests[i] = np.maximum.reduce([#an element-wise max of two arrays - one all zeros
-            np.zeros(ts.shape), (tau-lag-ts)/lag 
+            np.zeros(ts.shape), np.ceil((tau-lag-ts)/lag )
                 ] )
                     
     return ests.mean(0) #an average of the individual realisations of the upper bound at each t
