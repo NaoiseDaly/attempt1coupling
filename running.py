@@ -1,10 +1,7 @@
 from functions import *
 import logging 
-import pandas as pd
 logger = logging.getLogger(__name__)
 logging.basicConfig( level=logging.INFO)
-from scipy.stats import norm
-from generate_tau_samples import modified_coupled_MCMC2, sample_tau_L_for_many_lags
 np.random.seed(1345301)
 
 """looking at the maximal coupling algorithm on its own"""
@@ -19,7 +16,7 @@ np.random.seed(1345301)
 # plot_joint_marginal(df)
 
 """Doing MCMC with the maximal coupling algorithm as the proposal dist"""
-N = 2000
+# N = 2000
 # sample = coupled_MCMC1(N)
 # sample_after_burn_in = sample.iloc[N//5:]
 
@@ -39,7 +36,7 @@ N = 2000
 # plt.show()
 
 """Doing coupled MCMC with a lag"""
-N, L = 600, 200
+# N, L = 600, 200
 # c_sample = coupled_MCMC2(lag = L,max_t_iterations= N)
 
 # trace_plot(c_sample, L, 453)
@@ -68,6 +65,8 @@ for c in d.columns:
     xs = d[c] -int(c) #tau - lag
     ax1.ecdf(xs, complementary  = True )
 
+ax1.set_title("ECCDF of tau")
+ax1.set_xlabel("tau - lag")
 ax1.legend(d.columns, title = "lag")
 ax1.set_yscale("log")
 plt.show()
