@@ -5,8 +5,8 @@ logger = logging.getLogger(__name__)
 logging.basicConfig( level=logging.INFO)
 
 tau_data = sample_tau_L_for_many_lags(
-    lags = [100*i for i in range(3,9)], 
-    num_tau_samples = 100)
+    lags = [300, 500, 800], 
+    num_tau_samples = 1000)
 print_basic_df_summary(tau_data)
 
 #save just in case
