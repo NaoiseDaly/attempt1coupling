@@ -43,9 +43,10 @@ np.random.seed(1345301)
 # print_basic_df_summary(c_sample)
 # print_basic_df_summary(c_sample.iloc[((N-L)//5)+L:])
 
+"""Sample a lot of tau and estimate the TV upper bound for the chains"""
 #plot TV upper bound
 
-tv_f = "TV est 2025-01-28 Tue 15-06.csv"#"tv est 2025-01-28 Tue 10-20.csv" 
+tv_f = "tv est 2025-02-03 Mon 21-33.csv"#"TV est 2025-01-28 Tue 15-06.csv"#"tv est 2025-01-28 Tue 10-20.csv" 
 tv_est = read_df_file(tv_f)
 
 fig , ax1 = plt.subplots(1)
@@ -57,7 +58,7 @@ ax1.set_xlabel("time t")
 plt.show()
 
 # d = pd.read_csv(os.path.join("logs_and_data","tau lag 2025-01-27 Mon 20-19.csv") )
-tau_f = "tau lag 2025-01-28 Tue 15-06.csv" #"tau lag 2025-01-28 Tue 10-20.csv" # 
+tau_f = "tau lag 2025-02-03 Mon 21-33.csv"#"tau lag 2025-01-28 Tue 15-06.csv" #"tau lag 2025-01-28 Tue 10-20.csv" # 
 d = read_df_file(tau_f)
 
 fig , (ax1) = plt.subplots(1)
@@ -71,6 +72,18 @@ ax1.legend(d.columns, title = "lag")
 ax1.set_yscale("log")
 plt.show()
 
+#show them indivivdually
+for col in d.columns:
+    fig , ax1 = plt.subplots(1)
+    xs = d[col] -int(col) #tau - lag
+    ax1.ecdf(xs, complementary  = True )
+
+    ax1.set_title(f"ECCDF of tau when lag is {col}")
+    ax1.set_xlabel("tau - lag")
+    ax1.set_yscale("log")
+    plt.show()
+
+#examine tau
 shifted = d.apply(lambda s:s -int(s.name), axis = 0)
 print_basic_df_summary(shifted)
 fig , (ax1, ax2) = plt.subplots(1,2)
