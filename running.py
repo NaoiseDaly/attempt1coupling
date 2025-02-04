@@ -51,6 +51,7 @@ tv_est = read_df_file(tv_f)
 
 fig , ax1 = plt.subplots(1)
 ax1.plot(tv_est)
+ax1.axhline(0,color = "black", ls ="--")
 ax1.set_title(f"TV upper bound")
 ax1.legend(tv_est.columns, title = "Lag")
 ax1.set_ylabel("TV upper bound")
