@@ -2,10 +2,9 @@ import numpy as np
 from pandas import DataFrame
 from time import perf_counter
 from scipy.stats import norm, uniform
-from functions import max_coupling_algo1
+from functions import max_coupling_algo1, pretty_print_seconds
 import logging
 logger = logging.getLogger(__name__)
-
 
 def sample_tau_L_for_many_lags(lags:iter, num_tau_samples  =5, max_t_iterations = 10**5, starting_random_seed:int= 10101010 ):
     
@@ -22,7 +21,7 @@ def sample_tau_L_for_many_lags(lags:iter, num_tau_samples  =5, max_t_iterations 
     
     end_time = perf_counter()
     logger.info(
-        f"\t\t getting {num_tau_samples*len(lags):,} of tau took {round(end_time-start_time,1)} secs  "
+        f"\t\t getting {num_tau_samples*len(lags):,} of tau took {pretty_print_seconds(end_time-start_time)}"
     )
 
     return df
