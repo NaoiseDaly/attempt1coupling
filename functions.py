@@ -9,6 +9,20 @@ from pandas import DataFrame
 import pandas as pd
 import os 
 
+def pretty_print_seconds(secs):
+    """I didn't waste that much time on this"""
+
+    secs = int(secs) # perf_counter gives fractional seconds
+    if secs == 0:
+        return "0secs"
+    
+    mins, secs = divmod(secs, 60)
+    hours, mins = divmod(mins, 60)
+    return " ".join( f"{val}{name}" for name, val 
+                   in {"hours":hours, "mins":mins, "secs":secs}.items()
+                   if val !=0
+                   )
+
 def read_df_file(f_name):
     """convenience func that reads `f_name` in logs_and_data folder as a pandas Dataframe"""
     f = os.path.join("logs_and_data", f_name)
