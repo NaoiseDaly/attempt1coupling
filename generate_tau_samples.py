@@ -40,8 +40,8 @@ def modified_coupled_MCMC2(lag:int, max_t_iterations=10**3, random_state = None)
     #initialisation
     x_chain = np.zeros(max_t_iterations)
     y_chain = np.zeros(max_t_iterations)
-    #mu=0, sd =50 so this is a very wide range of starting points
-    x_chain[0], y_chain[0] = norm.rvs(size =2  ,scale = 50, random_state =random_state )
+    #mu=0, sd =100 so this is a very wide range of starting points
+    x_chain[0], y_chain[0] = norm.rvs(size =2  ,scale = 100, random_state =random_state )
     np.random.seed(random_state)  
     log_unifs = np.log(uniform.rvs(size = max_t_iterations+1)) #theres one spare here just to keep indexing simple
 
