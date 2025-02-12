@@ -62,7 +62,7 @@ if __name__ == "__main__":
     # e = time.perf_counter()
     # print( outputs, int(e-s) )
     
-    inputs = [300, 500, 800]; NUM_TAU =1000
+    inputs = [300, 500, 800]; NUM_TAU =20
     out = sample_tau_L_for_many_lags2(inputs,NUM_TAU , starting_random_seed=  1)
     s = time.perf_counter()
     print( sample_tau_L_for_many_lags(inputs, NUM_TAU, starting_random_seed=  1) )
