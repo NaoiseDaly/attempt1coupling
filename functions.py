@@ -64,7 +64,7 @@ def save_df_with_timestamp(df:DataFrame, msg = "data"):
         #sometimes the logging folder mightn't be on the remote machine
         os.mkdir(target_dir)
 
-    df.to_csv(f_path)
+    df.to_csv(f_path, index = True)
 
     return f_name
 
@@ -77,11 +77,11 @@ def estimate_TV_from_file(f_name,num_ts = 100, save_msg = "TV est"):
     """
     df = read_df_file(f_name)
 
-    ts = np.array(range(num_ts))
+    ts = np.array(range(1,num_ts+1))
     # estimating func is applied along columns , lag stored in column name
     tv_estimates = df.apply(lambda col : estimate_TV_upper(int(col.name), df[col.name], ts)
              , axis = 0)
-    tv_estimates.set_index(ts)
+    tv_estimates.set_index(ts, inplace=True)
 
     ests_f = save_df_with_timestamp(tv_estimates, save_msg)
 
