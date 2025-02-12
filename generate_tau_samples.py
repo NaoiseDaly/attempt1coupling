@@ -11,16 +11,16 @@ def sample_tau_L_for_many_lags(lags:iter,logger, num_tau_samples  =5
     start_time = perf_counter()
     df = DataFrame()
     random_gen = np.random.default_rng(starting_random_seed) # explicitly get a seed generator
-
-    for lag in lags:
-        logger.info(f"\t\t getting {num_tau_samples:,} of tau at lag {lag:,}")
-        #simulation parameters / args to the function making the chain
-        args = [ (lag, max_t_iterations, seed ) for seed in random_gen.integers(10**6, size = num_tau_samples )    ]
-        
-        # take any available processes and spread apply the tasks to them
-        with multiprocessing.Pool() as pool: #context manager for cleanup
+    # take any available processes and spread apply the tasks to them
+    with multiprocessing.Pool() as pool: #context manager for cleanup
+        for lag in lags:
+            logger.info(f"\t\t getting {num_tau_samples:,} of tau at lag {lag:,}")
+            #simulation parameters / args to the function making the chain
+            args = [ (lag, max_t_iterations, seed ) 
+                    for seed in random_gen.integers(10**6, size = num_tau_samples )    ]
+            #use many processes to execute chain on different parameters
             df[lag]  = pool.starmap(modified_coupled_MCMC2 , args)
-    
+        
     end_time = perf_counter()
     logger.info(
         f"\t\t getting {num_tau_samples*len(lags):,} of tau took {pretty_print_seconds(end_time-start_time)}"
