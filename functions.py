@@ -23,9 +23,9 @@ def pretty_print_seconds(secs):
                    if val !=0
                    )
 
-def read_df_file(f_name):
+def read_df_file(f_name, folder = "logs_and_data"):
     """convenience func that reads `f_name` in logs_and_data folder as a pandas Dataframe"""
-    f = os.path.join("logs_and_data", f_name)
+    f = os.path.join(folder, f_name)
     d = pd.read_csv(f, index_col = 0)
     return d
 
