@@ -4,11 +4,9 @@ import multiprocessing
 from time import perf_counter
 from scipy.stats import norm, uniform
 from functions import max_coupling_algo1, pretty_print_seconds
-import logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(level = logging.INFO)
 
-def sample_tau_L_for_many_lags(lags:iter, num_tau_samples  =5, max_t_iterations = 10**5, starting_random_seed:int= 10101010 ):
+def sample_tau_L_for_many_lags(lags:iter,logger, num_tau_samples  =5
+                               , max_t_iterations = 10**5, starting_random_seed:int= 10101010 ):
     
     start_time = perf_counter()
     df = DataFrame()
