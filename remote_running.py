@@ -1,15 +1,16 @@
 from functions import *
 from generate_tau_samples import sample_tau_L_for_many_lags
 
-logger = logging.getLogger(__name__)
-log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
-logging.basicConfig(filename = log_path , level=logging.INFO)
 
 if __name__ == "__main__":
+
+    logger = logging.getLogger(__name__)
+    log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
+    logging.basicConfig(filename = log_path , level=logging.INFO)
     # do not call sample_tau_L_for_many_lags outside of here 
     tau_data = sample_tau_L_for_many_lags(
         lags = [300, 500, 800], 
-        num_tau_samples = 10_000)
+        num_tau_samples = 100)
     print_basic_df_summary(tau_data)
 
     #save just in case
