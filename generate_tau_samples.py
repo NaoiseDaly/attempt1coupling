@@ -1,5 +1,6 @@
 import numpy as np
 from pandas import DataFrame
+import multiprocessing
 from time import perf_counter
 from scipy.stats import norm, uniform
 from functions import max_coupling_algo1, pretty_print_seconds
@@ -9,15 +10,17 @@ logger = logging.getLogger(__name__)
 def sample_tau_L_for_many_lags(lags:iter, num_tau_samples  =5, max_t_iterations = 10**5, starting_random_seed:int= 10101010 ):
     
     start_time = perf_counter()
-
     df = DataFrame()
- 
-    for l in lags:
-        logger.info(f"\t\t getting {num_tau_samples} of tau at lag {l}")
-        arr = np.zeros( ( num_tau_samples))
-        for i, seed in enumerate( range(starting_random_seed, starting_random_seed + num_tau_samples)  ):
-            arr[i] = modified_coupled_MCMC2(l, max_t_iterations, seed) 
-        df[l] = arr
+    random_gen = np.random.default_rng(starting_random_seed) # explicitly get a seed generator
+
+    for lag in lags:
+        logger.info(f"\t\t getting {num_tau_samples:,} of tau at lag {lag:,}")
+        #simulation parameters / args to the function making the chain
+        args = [ (lag, max_t_iterations, seed ) for seed in random_gen.integers(10**6, size = num_tau_samples )    ]
+        
+        # take any available processes and spread apply the tasks to them
+        with multiprocessing.Pool() as pool: #context manager for cleanup
+            df[lag]  = pool.starmap(modified_coupled_MCMC2 , args)
     
     end_time = perf_counter()
     logger.info(
