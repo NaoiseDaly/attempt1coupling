@@ -10,7 +10,7 @@ logging.basicConfig(filename = log_path , level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def sample_tau_L_for_many_lags(lags:iter, num_tau_samples  =5
+def sample_tau_L_for_many_lags(mcmc_algo ,lags:iter, num_tau_samples:int
                                , max_t_iterations = 10**5, starting_random_seed:int= 10101010 ):
     
     start_time = perf_counter()
@@ -24,7 +24,7 @@ def sample_tau_L_for_many_lags(lags:iter, num_tau_samples  =5
             args = [ (lag, max_t_iterations, seed ) 
                     for seed in random_gen.integers(10**6, size = num_tau_samples )    ]
             #use many processes to execute chain on different parameters
-            df[lag]  = pool.starmap(mcmc3 , args)
+            df[lag]  = pool.starmap(mcmc_algo , args)
         
     end_time = perf_counter()
     logger.info(
