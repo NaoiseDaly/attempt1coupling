@@ -121,7 +121,7 @@ def mcmc3(lag:int, max_t_iterations=10**3, random_state = None):
     coupling with a lag
     target a MV Normal2 with a hardcoded mean and covariance
     
-    returns the first meeting time tau
+    
     takes a random_state for reproducability
     """
         #start timing here
@@ -132,11 +132,12 @@ def mcmc3(lag:int, max_t_iterations=10**3, random_state = None):
     #initialisation
     x_chain = np.zeros(max_t_iterations)
     y_chain = np.zeros(max_t_iterations)
-    #mu=0, sd =100 so this is a very wide range of starting points
-    x_chain[0], y_chain[0] = norm.rvs(size =2  ,scale = 100, random_state =random_state )
-    np.random.seed(random_state)  
-    log_unifs = np.log(uniform.rvs(size = max_t_iterations+1)) #theres one spare here just to keep indexing simple
+    rng = np.random.default_rng(random_state)  
 
+    #mu=0, sd =100 so this is a very wide range of starting points
+    x_chain[0], y_chain[0] = norm.rvs(size =2  ,scale = 100, random_state =rng )
+    #theres one spare here just to keep indexing simple
+    log_unifs = np.log(uniform.rvs(size = max_t_iterations+1, random_state = rng)) 
     
     #abstraction
     def proposal_dist_logpdf(current_state):
@@ -144,7 +145,7 @@ def mcmc3(lag:int, max_t_iterations=10**3, random_state = None):
     def proposal_dist_sampler(current_state):
         return norm(current_state, 1).rvs
     def log_unnormalised_target_pdf(x):
-        return norm(3,4).logpdf(x)
+        return norm(loc = 3,scale  = 2).logpdf(x)
     
     
     def log_alpha(current, new):
@@ -152,11 +153,32 @@ def mcmc3(lag:int, max_t_iterations=10**3, random_state = None):
         bottom = log_unnormalised_target_pdf(current) + proposal_dist_logpdf(current)(new)
         return min( 0, top - bottom )
 
-    
+    def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
+        """
+        Sampling from a maximal coupling of x ~ p and y ~ q
+        , using Chp3 Algorithm 1 from P.Jacob 2021
+        
+        """
+        new_X = p_sampler(random_state = rng)
+        u  = uniform.rvs(random_state = rng)
+        if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
+            # logger.info(f"meeting {new_X:.2f}")
+            return (new_X, new_X) # X=Y
+        
+        new_Y = None
+        while not new_Y:
+            proposed_Y = q_sampler(random_state = rng)
+            u  = uniform.rvs(random_state = rng)
+            if np.log(u) + log_q_pdf(proposed_Y) > log_p_pdf(proposed_Y):
+                new_Y = proposed_Y
+
+        return (new_X, new_Y)
+
+
     # run X chain for lag steps
     for t in range(1,lag+1):
         current_state = x_chain[t-1]
-        proposed_state = proposal_dist_sampler(current_state)() # looks ugly i know
+        proposed_state = proposal_dist_sampler(current_state)(random_state =rng) # looks ugly i know
 
         if log_unifs[t] <= log_alpha(current_state, proposed_state):
             x_chain[t] = proposed_state
@@ -189,14 +211,11 @@ def mcmc3(lag:int, max_t_iterations=10**3, random_state = None):
         if not meeting_time and y_chain[t-lag] == x_chain[t]:
             #first time meeting
             meeting_time = t
-            break # no need to continue, tau observed
+            print(meeting_time)
+            # break # no need to continue, tau observed
 
-    #end timing now
-    end_time = perf_counter()
-    #record timing
-    # logger.info(
-    #     f"{random_state=} \t {round(end_time-start_time,1)} secs  {t} iterations, tau {meeting_time}"
-    # )
+    if meeting_time is None:
+        logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
 
-    return meeting_time
+    return DataFrame(dict({"X":x_chain, "Y":y_chain}))
 
