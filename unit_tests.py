@@ -1,6 +1,6 @@
 from functions import read_df_file
 import os, logging
-from generate_tau_samples import sample_tau_L_for_many_lags
+from generate_tau_samples import sample_tau_L_for_many_lags, mcmc3
 log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
 logging.basicConfig(filename = log_path , level=logging.INFO)
 test_logger = logging.getLogger(__name__)
@@ -20,6 +20,7 @@ def check_reproducability_sample_tau_L_for_many_lags():
 
     #run the simulation now using `starting_random_seed` = 10101010
     current_answer = sample_tau_L_for_many_lags(
+        mcmc3,
         lags = [300, 500, 800], 
         num_tau_samples = 100, starting_random_seed= 10101010)
     
