@@ -112,7 +112,7 @@ Also the bound was not effectively zero by 500 iterations for any lag either-whe
 # plt.show(	)
 
 from generate_tau_samples import mcmc3
-N, L = 350, 300
+N, L = 6_000, 300
 c_sample = mcmc3(lag = L,max_t_iterations= N, random_state=1)
 # trace_plot(c_sample, L)
 print_basic_df_summary(c_sample)
