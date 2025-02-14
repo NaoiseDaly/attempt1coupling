@@ -21,8 +21,8 @@ def sample_tau_L_for_many_lags(mcmc_algo ,lags:iter, num_tau_samples:int
         for lag in lags:
             logger.info(f"\t\t getting {num_tau_samples:,} of tau at lag {lag:,}")
             #simulation parameters / args to the function making the chain
-            args = [ (lag, max_t_iterations, seed ) 
-                    for seed in random_gen.integers(10**6, size = num_tau_samples )    ]
+            args = list(  (lag, max_t_iterations, seed ) 
+                    for seed in random_gen.integers(10**6, size = num_tau_samples )    )
             #use many processes to execute chain on different parameters
             df[lag]  = pool.starmap(mcmc_algo , args)
         
