@@ -45,3 +45,6 @@ def run_all_checks():
             print(msg)
 
     test_logger.info("\t finished unit tests \n")
+
+if __name__ == "__main__":
+    run_all_checks()
