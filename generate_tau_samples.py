@@ -211,11 +211,10 @@ def mcmc3(lag:int, max_t_iterations=10**3, random_state = None):
         if not meeting_time and y_chain[t-lag] == x_chain[t]:
             #first time meeting
             meeting_time = t
-            print(meeting_time)
-            # break # no need to continue, tau observed
+            break # no need to continue, tau observed
 
     if meeting_time is None:
         logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
 
-    return DataFrame(dict({"X":x_chain, "Y":y_chain}))
+    return meeting_time
 

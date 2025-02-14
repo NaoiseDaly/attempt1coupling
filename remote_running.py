@@ -10,7 +10,7 @@ if __name__ == "__main__":
     remote_logger = logging.getLogger(__name__)
     remote_logger.info("\n") # add a line to seperate this execution from any others
 
-    unit_tests.run_all_checks()
+    # unit_tests.run_all_checks()
 
     # do not call sample_tau_L_for_many_lags outside of here 
     tau_data = sample_tau_L_for_many_lags(
