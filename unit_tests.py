@@ -49,7 +49,7 @@ def run_all_checks():
             try:
                 test(func)
             except AssertionError as e:
-                msg = f"{func.__name__} failed unit test {test.__name__} "
+                msg = f"\t\t{func.__name__} failed unit test {test.__name__} "
                 test_logger.error(msg)
                 print(msg)
 
