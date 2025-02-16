@@ -333,3 +333,111 @@ def mvn_2d_mcmc(lag:int, max_t_iterations=10**3, random_state = None):
         logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
 
     return meeting_time
+
+def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**3, random_state = None):
+    """
+    returns tau, the first meeting time, from a coupling of 
+    two Pd norms with identical `mu` and `sigma` specified with lag `lag`.
+    
+    Takes a `random_state` for reproducability
+    """
+    #start timing here
+
+    P = len(mu); sigma_inv = np.linalg.inv(sigma)
+
+    #initialisation
+    x_chain = np.zeros((max_t_iterations,P))
+    y_chain = np.zeros((max_t_iterations,P))
+    rng = np.random.default_rng(random_state)  
+
+    #mu=0, sd =50 so this is a wide range of starting points
+    x_chain[0], y_chain[0] = multivariate_normal.rvs(size =2  ,cov = (50**2)*np.identity(P), random_state =rng )
+    #theres one spare here just to keep indexing simple
+    log_unifs = np.log(uniform.rvs(size = max_t_iterations+1, random_state = rng)) 
+    
+    """
+    Use a MVN proposal dist
+      centred at the current for symmetry
+      variance is probelem dependent, using 2 units in each direction
+      setting covariances to zero so i dont have to worry about them
+    """
+    #abstraction
+    def proposal_dist_logpdf(current_state):
+        return multivariate_normal(mean = current_state, cov = (2**2)*np.identity(P)).logpdf 
+    def proposal_dist_sampler(current_state):
+        return multivariate_normal(mean = current_state, cov = (2**2)*np.identity(P)).rvs
+    # def log_unnormalised_target_pdf(x): #not needed due to manual simplification of alpha
+    #     pass
+    
+    
+    def log_alpha(current, new):
+        """simplified log of alpha using the function local `mu` and `sigma_inv`"""
+        quad_new = quad_form_mvn(mu, sigma_inv, new)
+        quad_old = quad_form_mvn(mu, sigma_inv, current)
+
+        return min(0, -.5*(quad_new- quad_old))
+
+    def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
+        """
+        Sampling from a maximal coupling of x ~ p and y ~ q
+        , using Chp3 Algorithm 1 from P.Jacob 2021
+
+        uses a function-local random number generator `rng`   
+        """
+        new_X = p_sampler(random_state = rng)
+        u  = uniform.rvs(random_state = rng)
+        if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
+            return (new_X, new_X) # X=Y
+        
+        new_Y = None
+        while new_Y is None: # when new_Y is N-D, a NOT would error
+            proposed_Y = q_sampler(random_state = rng)
+            u  = uniform.rvs(random_state = rng)
+            if np.log(u) + log_q_pdf(proposed_Y) > log_p_pdf(proposed_Y):
+                new_Y = proposed_Y
+
+        return (new_X, new_Y)
+
+
+    # run X chain for lag steps
+    for t in range(1,lag+1):
+        current_state = x_chain[t-1,]
+        proposed_state = proposal_dist_sampler(current_state)(random_state =rng) # looks ugly i know
+
+        if log_unifs[t] <= log_alpha(current_state, proposed_state):
+            x_chain[t,] = proposed_state 
+        else:
+            x_chain[t,] = current_state 
+    
+    meeting_time = None
+    # now run a coupling with the lagged chains
+    for t in range(lag+1, max_t_iterations):
+        current_x = x_chain[t-1,]
+        current_y = y_chain[t-lag-1,] #fingers crossed 
+        
+        proposed_x, proposed_y = max_coupling_algo1(
+            proposal_dist_logpdf(current_x), proposal_dist_logpdf(current_y),
+            proposal_dist_sampler(current_x), proposal_dist_sampler(current_y)
+        )
+
+        log_u = log_unifs[t] # common random numbers
+
+        if log_u <= log_alpha(current_x, proposed_x):
+            x_chain[t,] = proposed_x
+        else:
+            x_chain[t,] = current_x
+
+        if log_u <= log_alpha(current_y, proposed_y):
+            y_chain[t-lag,] = proposed_y
+        else:
+            y_chain[t-lag,] = current_y
+
+        if not meeting_time and (y_chain[t-lag,] == x_chain[t,]).all() : 
+            #first time meeting
+            meeting_time = t
+            break # no need to continue, tau observed
+
+    if meeting_time is None:
+        logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
+
+    return meeting_time
