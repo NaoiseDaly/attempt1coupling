@@ -6,7 +6,7 @@ np.random.seed(1345301)
 
 """looking at the maximal coupling algorithm on its own"""
 # sample = [
-#     max_coupling_algo1(norm(5,3).logpdf, norm(10,1).logpdf, norm(5,3).rvs, norm(10,1).rvs)
+#     max_coupling_algo1(norm(5,3).logpdf, norm(10,1).logpdf, norm(5,3).rvs, norm(10,1).rvs,5)
 #     for _ in range(200)]
 # df = pd.DataFrame({"X":[pair[0] for pair in sample],
 #                    "Y":[ pair[1] for pair in sample]})

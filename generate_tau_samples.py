@@ -43,8 +43,6 @@ def modified_coupled_MCMC2(lag:int, max_t_iterations=10**3, random_state = None)
     returns the first meeting time tau
     takes a random_state for reproducability
     """
-        #start timing here
-    start_time = perf_counter()
 
     #initialisation
     x_chain = np.zeros(max_t_iterations)
@@ -70,6 +68,27 @@ def modified_coupled_MCMC2(lag:int, max_t_iterations=10**3, random_state = None)
         sigma_squared = 4   
         r = (current - new)*( current+new- 2*mu )/(2*sigma_squared)
         return min(0, r )
+    
+    def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
+        """
+        Sampling from a maximal coupling of x ~ p and y ~ q
+        , using Chp3 Algorithm 1 from P.Jacob 2021
+        
+        """
+        new_X = p_sampler()
+        u  = uniform.rvs()
+        if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
+            # logger.info(f"meeting {new_X:.2f}")
+            return (new_X, new_X) # X=Y
+        
+        new_Y = None
+        while not new_Y:
+            proposed_Y = q_sampler()
+            u  = uniform.rvs()
+            if np.log(u) + log_q_pdf(proposed_Y) > log_p_pdf(proposed_Y):
+                new_Y = proposed_Y
+
+        return (new_X, new_Y)
     
     # run X chain for lag steps
     for t in range(1,lag+1):
@@ -109,12 +128,6 @@ def modified_coupled_MCMC2(lag:int, max_t_iterations=10**3, random_state = None)
             meeting_time = t
             break # no need to continue, tau observed
 
-    #end timing now
-    end_time = perf_counter()
-    #record timing
-    # logger.info(
-    #     f"{random_state=} \t {round(end_time-start_time,1)} secs  {t} iterations, tau {meeting_time}"
-    # )
 
     return meeting_time
 
@@ -122,10 +135,6 @@ def mcmc4(lag:int, max_t_iterations=10**3, random_state = None):
     """
     seeing if its the log alpha slowing things
     """
-        #start timing here
-    start_time = perf_counter()
-
-    P = 2; mu = None
 
     #initialisation
     x_chain = np.zeros(max_t_iterations)
@@ -145,11 +154,7 @@ def mcmc4(lag:int, max_t_iterations=10**3, random_state = None):
     def log_unnormalised_target_pdf(x):
         return norm(loc = 3,scale  = 2).logpdf(x)
     
-    
-    # def log_alpha(current, new):
-    #     top = log_unnormalised_target_pdf(new) + proposal_dist_logpdf(new)(current)
-    #     bottom = log_unnormalised_target_pdf(current) + proposal_dist_logpdf(current)(new)
-    #     return min( 0, top - bottom )
+ 
     
     def log_alpha(current, new):
         """log of the alpha probability of accepting a proposed move.
@@ -159,27 +164,6 @@ def mcmc4(lag:int, max_t_iterations=10**3, random_state = None):
         sigma_squared = 4   
         r = (current - new)*( current+new- 2*mu )/(2*sigma_squared)
         return min(0, r )
-
-    def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
-        """
-        Sampling from a maximal coupling of x ~ p and y ~ q
-        , using Chp3 Algorithm 1 from P.Jacob 2021
-        
-        """
-        new_X = p_sampler(random_state = rng)
-        u  = uniform.rvs(random_state = rng)
-        if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
-            # logger.info(f"meeting {new_X:.2f}")
-            return (new_X, new_X) # X=Y
-        
-        new_Y = None
-        while not new_Y:
-            proposed_Y = q_sampler(random_state = rng)
-            u  = uniform.rvs(random_state = rng)
-            if np.log(u) + log_q_pdf(proposed_Y) > log_p_pdf(proposed_Y):
-                new_Y = proposed_Y
-
-        return (new_X, new_Y)
 
 
     # run X chain for lag steps
@@ -269,28 +253,6 @@ def mvn_2d_mcmc(lag:int, max_t_iterations=10**3, random_state = None):
 
         return min(0, -.5*(quad_new- quad_old))
 
-    def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
-        """
-        Sampling from a maximal coupling of x ~ p and y ~ q
-        , using Chp3 Algorithm 1 from P.Jacob 2021
-
-        uses a function-local random number generator `rng`   
-        """
-        new_X = p_sampler(random_state = rng)
-        u  = uniform.rvs(random_state = rng)
-        if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
-            return (new_X, new_X) # X=Y
-        
-        new_Y = None
-        while new_Y is None: # when new_Y is N-D, a NOT would error
-            proposed_Y = q_sampler(random_state = rng)
-            u  = uniform.rvs(random_state = rng)
-            if np.log(u) + log_q_pdf(proposed_Y) > log_p_pdf(proposed_Y):
-                new_Y = proposed_Y
-
-        return (new_X, new_Y)
-
-
     # run X chain for lag steps
     for t in range(1,lag+1):
         current_state = x_chain[t-1,]
@@ -310,6 +272,7 @@ def mvn_2d_mcmc(lag:int, max_t_iterations=10**3, random_state = None):
         proposed_x, proposed_y = max_coupling_algo1(
             proposal_dist_logpdf(current_x), proposal_dist_logpdf(current_y),
             proposal_dist_sampler(current_x), proposal_dist_sampler(current_y)
+            ,rng
         )
 
         log_u = log_unifs[t] # common random numbers
@@ -377,28 +340,6 @@ def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**3, random_state = None)
 
         return min(0, -.5*(quad_new- quad_old))
 
-    def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
-        """
-        Sampling from a maximal coupling of x ~ p and y ~ q
-        , using Chp3 Algorithm 1 from P.Jacob 2021
-
-        uses a function-local random number generator `rng`   
-        """
-        new_X = p_sampler(random_state = rng)
-        u  = uniform.rvs(random_state = rng)
-        if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
-            return (new_X, new_X) # X=Y
-        
-        new_Y = None
-        while new_Y is None: # when new_Y is N-D, a NOT would error
-            proposed_Y = q_sampler(random_state = rng)
-            u  = uniform.rvs(random_state = rng)
-            if np.log(u) + log_q_pdf(proposed_Y) > log_p_pdf(proposed_Y):
-                new_Y = proposed_Y
-
-        return (new_X, new_Y)
-
-
     # run X chain for lag steps
     for t in range(1,lag+1):
         current_state = x_chain[t-1,]
@@ -418,6 +359,7 @@ def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**3, random_state = None)
         proposed_x, proposed_y = max_coupling_algo1(
             proposal_dist_logpdf(current_x), proposal_dist_logpdf(current_y),
             proposal_dist_sampler(current_x), proposal_dist_sampler(current_y)
+            ,rng
         )
 
         log_u = log_unifs[t] # common random numbers

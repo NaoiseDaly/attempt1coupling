@@ -237,22 +237,43 @@ def coupled_MCMC1( max_t_iterations=10**3):
     return DataFrame({"X":x_chain, "Y":y_chain})
 
 
-def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
+# def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
+#     """
+#     Sampling from a maximal coupling of x ~ p and y ~ q
+#     , using Chp3 Algorithm 1 from P.Jacob 2021
+    
+#     """
+#     new_X = p_sampler()
+#     u  = uniform.rvs()
+#     if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
+#         # logger.info(f"meeting {new_X:.2f}")
+#         return (new_X, new_X) # X=Y
+    
+#     new_Y = None
+#     while not new_Y:
+#         proposed_Y = q_sampler()
+#         u  = uniform.rvs()
+#         if np.log(u) + log_q_pdf(proposed_Y) > log_p_pdf(proposed_Y):
+#             new_Y = proposed_Y
+
+#     return (new_X, new_Y)
+
+def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler, rng):
     """
     Sampling from a maximal coupling of x ~ p and y ~ q
     , using Chp3 Algorithm 1 from P.Jacob 2021
-    
+
+    requires a random number generator `rng`   
     """
-    new_X = p_sampler()
-    u  = uniform.rvs()
+    new_X = p_sampler(random_state = rng)
+    u  = uniform.rvs(random_state = rng)
     if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
-        # logger.info(f"meeting {new_X:.2f}")
         return (new_X, new_X) # X=Y
     
     new_Y = None
-    while not new_Y:
-        proposed_Y = q_sampler()
-        u  = uniform.rvs()
+    while new_Y is None: # when new_Y is N-D, a NOT would error
+        proposed_Y = q_sampler(random_state = rng)
+        u  = uniform.rvs(random_state = rng)
         if np.log(u) + log_q_pdf(proposed_Y) > log_p_pdf(proposed_Y):
             new_Y = proposed_Y
 
