@@ -1,5 +1,5 @@
 from functions import print_basic_df_summary, save_df_with_timestamp, estimate_TV_from_file
-from generate_tau_samples import sample_tau_L_for_many_lags, mcmc3, modified_coupled_MCMC2
+from generate_tau_samples import sample_tau_L_for_many_lags, mcmc3, modified_coupled_MCMC2, mvn_2d_mcmc
 import unit_tests
 import logging, os.path
 
@@ -14,9 +14,9 @@ if __name__ == "__main__":
 
     # do not call sample_tau_L_for_many_lags outside of here 
     tau_data = sample_tau_L_for_many_lags(
-        mcmc3,
+        mvn_2d_mcmc,
         lags = [300, 500, 800],
-        num_tau_samples = 100)
+        num_tau_samples = 10_000)
     print_basic_df_summary(tau_data)
 
     #save just in case
