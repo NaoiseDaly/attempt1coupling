@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 def sample_tau_L_for_many_lags(mcmc_algo ,lags:iter, num_tau_samples:int
                                , max_t_iterations = 10**5, starting_random_seed:int= 10101010 ):
-    
+    """
+    `WARNING` only run this function inside an `__name__ == "__main__"` block.  `WARNING`
+    """
     start_time = perf_counter()
     df = DataFrame()
     random_gen = np.random.default_rng(starting_random_seed) # explicitly get a seed generator
