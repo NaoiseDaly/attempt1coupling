@@ -246,14 +246,14 @@ def mvn_2d_mcmc(lag:int, max_t_iterations=10**3, random_state = None):
     """
     Use a MVN proposal dist
       centred at the current for symmetry
-      variance is probelem dependent, using 5 units in each direction
+      variance is probelem dependent, using 2 units in each direction
       setting covariances to zero so i dont have to worry about them
     """
     #abstraction
     def proposal_dist_logpdf(current_state):
-        return multivariate_normal(mean = current_state, cov = 25*np.identity(P)).logpdf 
+        return multivariate_normal(mean = current_state, cov = (2**2)*np.identity(P)).logpdf 
     def proposal_dist_sampler(current_state):
-        return multivariate_normal(mean = current_state, cov = 25*np.identity(P)).rvs
+        return multivariate_normal(mean = current_state, cov = (2**2)*np.identity(P)).rvs
     # def log_unnormalised_target_pdf(x): #not needed due to manual simplification of alpha
     #     pass
     
