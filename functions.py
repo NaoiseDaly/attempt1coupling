@@ -46,6 +46,11 @@ def estimate_TV_upper(lag, taus, ts):
     return ests.mean(0) #an average of the individual realisations of the upper bound at each t
         
 
+def quad_form_mvn(mu, sigma_inverted, state)->float:
+    """The bit in the exponential in the likelihood of a MVN"""
+    centred = state - mu
+    return np.matmul(np.matmul( centred.T, sigma_inverted), centred)
+
 def make_timestamp():
     """makes a timestamp of roughly right now ( to the minute) as a string"""
     import datetime
