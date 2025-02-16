@@ -1,5 +1,5 @@
 from functions import print_basic_df_summary, save_df_with_timestamp, estimate_TV_from_file
-from generate_tau_samples import sample_tau_L_for_many_lags, mcmc3, modified_coupled_MCMC2, mvn_2d_mcmc
+from generate_tau_samples import sample_tau_L_for_many_lags, mcmc3, modified_coupled_MCMC2,mcmc4, mvn_2d_mcmc
 import unit_tests
 import logging, os.path
 
@@ -10,11 +10,11 @@ if __name__ == "__main__":
     remote_logger = logging.getLogger(__name__)
     remote_logger.info("\n") # add a line to seperate this execution from any others
 
-    unit_tests.run_all_checks()
+    # unit_tests.run_all_checks()
 
     # do not call sample_tau_L_for_many_lags outside of here 
     tau_data = sample_tau_L_for_many_lags(
-        mvn_2d_mcmc,
+        mcmc4,
         lags = [300, 500, 800],
         num_tau_samples = 10_000)
     print_basic_df_summary(tau_data)
