@@ -18,7 +18,7 @@ def reproduce__sample_tau_L_for_many_lags(algo):
     """
     #run the simulation now using `starting_random_seed` = 10101010
     current_answer = sample_tau_L_for_many_lags(
-        mcmc4,
+        algo,
         lags = [300, 500, 800], 
         num_tau_samples = 100, starting_random_seed= 10101010)
 
