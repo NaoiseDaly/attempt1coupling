@@ -15,7 +15,7 @@ def check_reproducability_sample_tau_L_for_many_lags():
     current_answer = sample_tau_L_for_many_lags(
         mcmc4,
         lags = [300, 500, 800], 
-        num_tau_samples = 100, starting_random_seed= 10101010)
+        num_tau_samples = 10_000, starting_random_seed= 10101010)
 
     #load result carried out before using `starting_random_seed` = 10101010
     f_name = "check_reproducability_sample_tau_L_for_many_lags3.csv"
