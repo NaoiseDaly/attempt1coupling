@@ -63,50 +63,71 @@ Also the bound was not effectively zero by 500 iterations for any lag either-whe
 
 tv_f = "tv est 2025-02-04 Tue 13-36.csv"
 #"tv est 2025-02-03 Mon 21-33.csv"#"TV est 2025-01-28 Tue 15-06.csv"#"tv est 2025-01-28 Tue 10-20.csv" 
-tv_est = read_df_file(tv_f)
+def plot_tv_upper_bound(tv_f, title_rv_name):
+    tv_est = read_df_file(tv_f)
 
-fig , ax1 = plt.subplots(1)
-ax1.plot(tv_est)
-ax1.axhline(0,color = "black", ls ="--")
-ax1.set_title(f"TV upper bound")
-ax1.legend(tv_est.columns, title = "Lag")
-ax1.set_ylabel("TV upper bound")
-ax1.set_xlabel("time t")
-plt.show()
+    fig , ax1 = plt.subplots(1)
+    ax1.plot(tv_est)
+    ax1.axhline(0,color = "black", ls ="--")
+    ax1.set_title(f"TV upper bound for {title_rv_name}")
+    ax1.legend(tv_est.columns, title = "Lag")
+    ax1.set_ylabel("TV upper bound")
+    ax1.set_xlabel("time t")
+    plt.show()
+
+
+plot_tv_upper_bound(tv_f, "N(3,4)")
 
 # d = pd.read_csv(os.path.join("logs_and_data","tau lag 2025-01-27 Mon 20-19.csv") )
 tau_f = "tau lag 2025-02-04 Tue 13-36.csv"
 #"tau lag 2025-02-03 Mon 21-33.csv"#"tau lag 2025-01-28 Tue 15-06.csv" #"tau lag 2025-01-28 Tue 10-20.csv" # 
-d = read_df_file(tau_f)
+def plot_tau_stuff(tau_f, title_rv_name):
+    d = read_df_file(tau_f)
 
-fig , (ax1) = plt.subplots(1)
-for c in d.columns:
-    xs = d[c] -int(c) #tau - lag
-    ax1.ecdf(xs, complementary  = True )
+    fig , (ax1) = plt.subplots(1)
+    for c in d.columns:
+        xs = d[c] -int(c) #tau - lag
+        ax1.ecdf(xs, complementary  = True )
 
-ax1.set_title("ECCDF of tau")
-ax1.set_xlabel("tau - lag")
-ax1.legend(d.columns, title = "lag")
-ax1.set_yscale("log")
-plt.show()
-
-#show them indivivdually
-for col in d.columns:
-    fig , ax1 = plt.subplots(1)
-    xs = d[col] -int(col) #tau - lag
-    ax1.ecdf(xs, complementary  = True )
-
-    ax1.set_title(f"ECCDF of tau when lag is {col}")
+    ax1.set_title(f"ECCDF of tau for {title_rv_name}")
     ax1.set_xlabel("tau - lag")
+    ax1.legend(d.columns, title = "lag")
     ax1.set_yscale("log")
     plt.show()
 
-#examine tau
-shifted = d.apply(lambda s:s -int(s.name), axis = 0)
-print_basic_df_summary(shifted)
-fig , (ax1, ax2) = plt.subplots(1,2)
-ax1.boxplot(d, tick_labels = d.columns)
-ax1.set_title("tau")
-ax2.boxplot(shifted, tick_labels = d.columns)
-ax2.set_title("tau-lag")
-plt.show(	)
+    # #show them indivivdually
+    # for col in d.columns:
+    #     fig , ax1 = plt.subplots(1)
+    #     xs = d[col] -int(col) #tau - lag
+    #     ax1.ecdf(xs, complementary  = True )
+
+    #     ax1.set_title(f"ECCDF of tau when lag is {col}")
+    #     ax1.set_xlabel("tau - lag")
+    #     ax1.set_yscale("log")
+    #     plt.show()
+
+    #examine tau
+    shifted = d.apply(lambda s:s -int(s.name), axis = 0)
+    # print_basic_df_summary(shifted)
+    fig , (ax1, ax2) = plt.subplots(1,2)
+    fig.suptitle(title_rv_name)
+    ax1.boxplot(d, tick_labels = d.columns)
+    ax1.set_title("tau")
+    ax2.boxplot(shifted, tick_labels = d.columns)
+    ax2.set_title(f"tau-lag")
+    plt.show(	)
+
+plot_tau_stuff(tau_f, "N(3,4)")
+
+"""
+For multivariate norm
+mu = [3,4]; sigma = [[4,1],[1,2]]
+
+Compared to the univariate example above the chains converge quickly
+The TV bound also appears almost sinusoidal
+"""
+tau_f = os.path.join("good samples","N--3-4--4-1-1-2--10Ks",   "tau lag 2025-02-16 Sun 16-28.csv")
+tv_f = os.path.join("good samples", "N--3-4--4-1-1-2--10Ks", "TV est 2025-02-16 Sun 16-28.csv" )
+name = r"$N_2(\mu, \Sigma)$" #slip in a bit of latex
+plot_tv_upper_bound(tv_f, name)
+plot_tau_stuff(tau_f, name)
