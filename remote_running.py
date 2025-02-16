@@ -1,5 +1,5 @@
 from functions import print_basic_df_summary, save_df_with_timestamp, estimate_TV_from_file
-from generate_tau_samples import sample_tau_L_for_many_lags, mcmc3, modified_coupled_MCMC2,mcmc4, mvn_2d_mcmc
+from generate_tau_samples import *
 from unit_tests import     run_all_checks
 import logging, os.path
 
