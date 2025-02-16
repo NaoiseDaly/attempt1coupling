@@ -23,7 +23,7 @@ def reproduce__sample_tau_L_for_many_lags(algo):
         num_tau_samples = 100, starting_random_seed= 10101010)
 
     #load result carried out before using `starting_random_seed` = 10101010
-    f_name = f"check_reproducability_sample_tau_L_for_many_lags__{algo.__name}.csv"
+    f_name = f"check_reproducability_sample_tau_L_for_many_lags__{algo.__name__}.csv"
 
     original_answer = read_df_file(f_name, FOLDER_PATH)
     # nice little catch that would make a df comparison fail
@@ -49,7 +49,7 @@ def run_all_checks():
             try:
                 test(func)
             except AssertionError as e:
-                msg = f"{func.__name} failed unit test {test.__name__} "
+                msg = f"{func.__name__} failed unit test {test.__name__} "
                 test_logger.error(msg)
                 print(msg)
 
