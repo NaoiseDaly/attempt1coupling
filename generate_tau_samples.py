@@ -237,7 +237,7 @@ def mvn_2d_mcmc(lag:int, max_t_iterations=10**3, random_state = None):
     rng = np.random.default_rng(random_state)  
 
     #mu=0, sd =50 so this is a wide range of starting points
-    x_chain[0], y_chain[0] = multivariate_normal.rvs(size =2  ,cov = 250*np.identity(P), random_state =rng )
+    x_chain[0], y_chain[0] = multivariate_normal.rvs(size =2  ,cov = (50**2)*np.identity(P), random_state =rng )
     #theres one spare here just to keep indexing simple
     log_unifs = np.log(uniform.rvs(size = max_t_iterations+1, random_state = rng)) 
     
