@@ -54,7 +54,13 @@ def reproduce__make_cov_funcs(func):
 
     assert np.array_equal(original_answer, current_answer)
 
-
+def safe_test(test, func):
+    try:
+        test(func)
+    except AssertionError as e:
+        msg = f"\t\t{func.__name__} failed unit test {test.__name__} "
+        test_logger.error(msg)
+        print(msg)
     
 
 
@@ -64,30 +70,16 @@ def run_all_checks():
     Side-effects may include excessive logging
     
     Please ensure this is nested somehow in an `if __name__ = "__main__"`"""
-    test_logger.info("\t starting unit tests")
-    tests = [
-        reproduce__sample_tau_L_for_many_lags
-        ]
-    funcs = [modified_coupled_MCMC2, mvn_2d_mcmc]
-    for test in tests:
-        for func in funcs:
-            try:
-                test(func)
-            except AssertionError as e:
-                msg = f"\t\t{func.__name__} failed unit test {test.__name__} "
-                test_logger.error(msg)
-                print(msg)
 
-    #construction of covariance matrices 
-    funcs = [make_cov_haar, make_cov_ar1]
-    test = reproduce__make_cov_funcs
-    for func in funcs:
-        try:
-            test(func)
-        except AssertionError as e:
-            msg = f"\t\t{func.__name__} failed unit test {test.__name__} "
-            test_logger.error(msg)
-            print(msg)    
+    test_logger.info("\t starting unit tests")
+
+    for test, test_args in [
+         (reproduce__sample_tau_L_for_many_lags, [modified_coupled_MCMC2, mvn_2d_mcmc])
+        ,(reproduce__make_cov_funcs, [make_cov_haar, make_cov_ar1])
+        ]:
+        for func in test_args:
+            safe_test(test, func)
+        
 
 
 
