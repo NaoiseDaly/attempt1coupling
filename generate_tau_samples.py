@@ -387,7 +387,7 @@ def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**4, random_state = None)
 
     return meeting_time
 
-class some_random_Pd_mcmc:
+class Some_random_Pd_mcmc:
     """
     `sample_tau_L_for_many_lags ` needs a function of this form and im not rewriting `sample_tau_L_for_many_lags`
 
