@@ -74,7 +74,9 @@ def run_all_checks():
     test_logger.info("\t starting unit tests")
 
     for test, test_args in [
-         (reproduce__sample_tau_L_for_many_lags, [modified_coupled_MCMC2, mvn_2d_mcmc])
+         (reproduce__sample_tau_L_for_many_lags, 
+          [modified_coupled_MCMC2, mvn_2d_mcmc,
+           Some_random_Pd_mcmc(1, 9),Some_random_Pd_mcmc(2,10), Some_random_Pd_mcmc(3,11)])
         ,(reproduce__make_cov_funcs, [make_cov_haar, make_cov_ar1])
         ]:
         for func in test_args:

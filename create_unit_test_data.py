@@ -1,4 +1,4 @@
-from generate_tau_samples import sample_tau_L_for_many_lags, modified_coupled_MCMC2, mvn_2d_mcmc, mcmc4
+from generate_tau_samples import *
 from functions import make_cov_haar, make_cov_ar1
 import os
 import numpy as np
@@ -13,7 +13,8 @@ if __name__ == "__main__":
     remote_logger.info("\n") # add a line to seperate this execution from any others
     
     #original mcmc algorithms
-    for algo in [modified_coupled_MCMC2, mvn_2d_mcmc, mcmc4]:
+    for algo in [modified_coupled_MCMC2, mvn_2d_mcmc,
+                 Some_random_Pd_mcmc(1, 9),Some_random_Pd_mcmc(2,10), Some_random_Pd_mcmc(3,11) ]:
         remote_logger.info(f"running {algo.__name__}")
         tau_data = sample_tau_L_for_many_lags(
             algo,
