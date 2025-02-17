@@ -3,7 +3,7 @@ from pandas import DataFrame
 import multiprocessing
 from time import perf_counter
 from scipy.stats import norm, uniform, multivariate_normal
-from functions import max_coupling_algo1, pretty_print_seconds, quad_form_mvn
+from functions import max_coupling_algo1, pretty_print_seconds, quad_form_mvn,make_cov_diag
 import os, logging
 log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
 logging.basicConfig(filename = log_path , level=logging.INFO)
@@ -18,13 +18,16 @@ def sample_tau_L_for_many_lags(mcmc_algo ,lags:iter, num_tau_samples:int
     start_time = perf_counter()
     df = DataFrame()
     random_gen = np.random.default_rng(starting_random_seed) # explicitly get a seed generator
+
     # take any available processes and spread apply the tasks to them
     with multiprocessing.Pool() as pool: #context manager for cleanup
         for lag in lags:
             logger.info(f"\t\t getting {num_tau_samples:,} of tau at lag {lag:,}")
+
             #simulation parameters / args to the function making the chain
             args = list(  (lag, max_t_iterations, seed ) 
                     for seed in random_gen.integers(10**6, size = num_tau_samples )    )
+            
             #use many processes to execute chain on different parameters
             df[lag]  = pool.starmap(mcmc_algo , args)
         
@@ -297,7 +300,7 @@ def mvn_2d_mcmc(lag:int, max_t_iterations=10**3, random_state = None):
 
     return meeting_time
 
-def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**3, random_state = None):
+def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**4, random_state = None):
     """
     returns tau, the first meeting time, from a coupling of 
     two Pd norms with identical `mu` and `sigma` specified with lag `lag`.
@@ -383,3 +386,21 @@ def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**3, random_state = None)
         logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
 
     return meeting_time
+
+class some_random_Pd_mcmc:
+    """
+    `sample_tau_L_for_many_lags ` needs a function of this form and im not rewriting `sample_tau_L_for_many_lags`
+
+    Life is now complicated.
+    """
+    def __init__(self, p, seed):
+        rng = np.random.default_rng(seed)
+        self.__mu = rng.uniform(-10**2, 10**2, size = p)
+        scale = rng.poisson(5, size=1)[0]
+        self.__sigma = make_cov_diag(p, 1/scale)
+
+    def __call__(self,*args):
+        return mvn_Pd_mcmc(
+            self.__mu, self.__sigma,
+            *args
+        )
