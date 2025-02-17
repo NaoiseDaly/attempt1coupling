@@ -4,10 +4,14 @@ import os
 import numpy as np
 import logging
 
+def make_log_path_str(f_name):
+    """os safe. Save to logs and data so it can be easily ran and moved on remote"""
+    return os.path.join("logs_and_data", f_name)
+
 if __name__ == "__main__":
     
     #make a logger for this file
-    log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
+    log_path = make_log_path_str( "MCMCcouplingSimulation.log")
     logging.basicConfig(filename = log_path , level=logging.INFO)
     remote_logger = logging.getLogger(__name__)
     remote_logger.info("\n") # add a line to seperate this execution from any others
@@ -24,7 +28,7 @@ if __name__ == "__main__":
             )   
         
         f_name = f"check_reproducability_sample_tau_L_for_many_lags__{algo.__name__}.csv"
-        f_path = os.path.join("logs_and_data", f_name)
+        f_path = make_log_path_str( f_name)
 
         tau_data.to_csv(f_path, index = True)
 
@@ -39,7 +43,7 @@ if __name__ == "__main__":
             cov_dat[i, ] = func(seed, p, i+1)
 
         f_name = f"reproduce__{func.__name__}.npy"
-        f_path = os.path.join("keep_safe","unit_test_data",  f_name)
+        f_path = make_log_path_str( f_name)
         np.save(f_path, cov_dat)
         remote_logger.info(f"saved to {f_path}")
     
