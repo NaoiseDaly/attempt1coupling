@@ -3,7 +3,7 @@ from pandas import DataFrame
 import multiprocessing
 from time import perf_counter
 from scipy.stats import norm, uniform, multivariate_normal
-from functions import max_coupling_algo1, pretty_print_seconds, quad_form_mvn,make_cov_diag
+from functions import max_coupling_algo1, pretty_print_seconds, quad_form_mvn,make_cov_diag,make_cov_haar
 import os, logging
 log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
 logging.basicConfig(filename = log_path , level=logging.INFO)
@@ -320,7 +320,8 @@ class Some_random_Pd_mcmc:
         rng = np.random.default_rng(seed)
         self.__mu = rng.uniform(-10**2, 10**2, size = p)
         scale = rng.poisson(5, size=1)[0]
-        self.__sigma = make_cov_diag(p, 1/scale)
+        cov_seed = rng.integers(0, 10**6, size = 1)[0]
+        self.__sigma = make_cov_haar(cov_seed, p, 1/scale)
 
     def __call__(self,*args):
         return mvn_Pd_mcmc(
