@@ -15,9 +15,9 @@ if __name__ == "__main__":
 
     # do not call sample_tau_L_for_many_lags outside of here 
     tau_data = sample_tau_L_for_many_lags(
-        mvn_2d_mcmc,
+        Some_random_Pd_mcmc(p = 3,seed = 5),
         lags = [300, 500, 800],
-        num_tau_samples = 10_000)
+        num_tau_samples = 100)
     print_basic_df_summary(tau_data)
 
     #save just in case
