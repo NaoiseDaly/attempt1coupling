@@ -1,6 +1,8 @@
-from functions import read_df_file
+from functions import *
 import os, logging
 from generate_tau_samples import *
+import numpy as np
+from numpy.random import default_rng
 log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
 logging.basicConfig(filename = log_path , level=logging.INFO)
 test_logger = logging.getLogger(__name__)
@@ -32,6 +34,29 @@ def reproduce__sample_tau_L_for_many_lags(algo):
     # compare dfs
     assert  original_answer.equals(current_answer) 
 
+def reproduce__make_cov_funcs(func):
+    """
+    check the reproducability of `func` by running it 
+    with hardcoded inputs and seed, and then comparing to prior saved output
+
+    `func` should be one of the following:
+    ``
+    """
+    p = 10; num_matrices = 10
+
+    current_answer = np.zeros((num_matrices,p,p))
+    for i, seed in enumerate(range(  33**3, num_matrices+ 33**3)):
+        current_answer[i, ] = func(seed, p, i+1)
+
+    f_name = f"reproduce__{func.__name__}.npy"
+    f_path = os.path.join(FOLDER_PATH, f_name)
+    original_answer = np.load(f_path)
+
+    assert np.array_equal(original_answer, current_answer)
+
+
+    
+
 
 def run_all_checks():
     """
@@ -52,6 +77,20 @@ def run_all_checks():
                 msg = f"\t\t{func.__name__} failed unit test {test.__name__} "
                 test_logger.error(msg)
                 print(msg)
+
+    #construction of covariance matrices 
+    funcs = [make_cov_haar, make_cov_ar1]
+    test = reproduce__make_cov_funcs
+    for func in funcs:
+        try:
+            test(func)
+        except AssertionError as e:
+            msg = f"\t\t{func.__name__} failed unit test {test.__name__} "
+            test_logger.error(msg)
+            print(msg)    
+
+
+
 
     test_logger.info("\t finished unit tests \n")
 

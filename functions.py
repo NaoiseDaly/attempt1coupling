@@ -5,6 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 from time import perf_counter
 from scipy.stats import norm, uniform
+from scipy.linalg import toeplitz
 from pandas import DataFrame
 import pandas as pd
 import os 
@@ -45,6 +46,29 @@ def estimate_TV_upper(lag, taus, ts):
                     
     return ests.mean(0) #an average of the individual realisations of the upper bound at each t
         
+def make_cov_haar(seed, p, scale = 1):
+    """generates a random `P`d diagonal covariance matrix    """
+    s_sqrt = norm.rvs( size = p**2, random_state= seed).reshape(p,p)
+    cov = np.matmul(s_sqrt, s_sqrt)
+    return cov/scale
+
+def make_cov_equivar(p, rho, scale = 1):
+    """Equicorrelated covariance"""
+    return (np.diagflat([1-rho for _ in range(p)]) + rho ) /scale
+
+def make_cov_ar1(seed, p, rho = .5):
+    rng = np.random.default_rng(seed)
+
+    perm = np.identity(p)
+    #shuffle columns
+    rng.shuffle(perm.T) #dont need transpose here as perm is symmetric
+
+    t = toeplitz([rho**i for i in range(p)])
+    return np.matmul( perm.T, np.matmul(t, perm) )
+
+def make_cov_diag( p, scale = 1):
+    """diagonal covariance"""
+    return np.identity(p)/scale
 
 def quad_form_mvn(mu, sigma_inverted, state)->float:
     """The bit in the exponential in the likelihood of a MVN"""
@@ -236,27 +260,6 @@ def coupled_MCMC1( max_t_iterations=10**3):
 
     return DataFrame({"X":x_chain, "Y":y_chain})
 
-
-# def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler):
-#     """
-#     Sampling from a maximal coupling of x ~ p and y ~ q
-#     , using Chp3 Algorithm 1 from P.Jacob 2021
-    
-#     """
-#     new_X = p_sampler()
-#     u  = uniform.rvs()
-#     if np.log(u) + log_p_pdf(new_X) <= log_q_pdf(new_X):
-#         # logger.info(f"meeting {new_X:.2f}")
-#         return (new_X, new_X) # X=Y
-    
-#     new_Y = None
-#     while not new_Y:
-#         proposed_Y = q_sampler()
-#         u  = uniform.rvs()
-#         if np.log(u) + log_q_pdf(proposed_Y) > log_p_pdf(proposed_Y):
-#             new_Y = proposed_Y
-
-#     return (new_X, new_Y)
 
 def max_coupling_algo1(log_p_pdf, log_q_pdf, p_sampler, q_sampler, rng):
     """
