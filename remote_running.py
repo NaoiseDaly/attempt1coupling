@@ -17,7 +17,7 @@ if __name__ == "__main__":
     tau_data = sample_tau_L_for_many_lags(
         Some_random_Pd_mcmc(p = 3,seed = 5),
         lags = [300, 500, 800],
-        num_tau_samples = 100)
+        num_tau_samples = 1_000)
     print_basic_df_summary(tau_data)
 
     #save just in case
