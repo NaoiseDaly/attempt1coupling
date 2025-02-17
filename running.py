@@ -128,6 +128,12 @@ The TV bound also appears almost sinusoidal
 """
 tau_f = os.path.join("good samples","N--3-4--4-1-1-2--10Ks",   "tau lag 2025-02-16 Sun 16-28.csv")
 tv_f = os.path.join("good samples", "N--3-4--4-1-1-2--10Ks", "TV est 2025-02-16 Sun 16-28.csv" )
-name = r"$N_2(\mu, \Sigma)$" #slip in a bit of latex
+name = r"$N_2(\mu, \Sigma)$"
+plot_tv_upper_bound(tv_f, name)
+plot_tau_stuff(tau_f, name)
+
+tau_f =  "tau lag 2025-02-17 Mon 20-46.csv"
+tv_f =  "TV est 2025-02-17 Mon 20-46.csv" 
+name = r"$N_3(\mu, \Sigma)$" 
 plot_tv_upper_bound(tv_f, name)
 plot_tau_stuff(tau_f, name)
