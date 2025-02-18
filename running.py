@@ -49,42 +49,6 @@ def read_demo_df_file(f_name, f_subfolder):
     #inside df it will try join f_path to logs_and_data and fail, using just f_path
     return read_df_file(f_name, folder)
 
-"""Sample a lot of tau and estimate the TV upper bound for the chains
-
-tv est 2025-02-04 Tue 13-36.csv 
-has a sample of 10K when chains start points are initialised
-by N(0,50^2) 
-
-tv est 2025-02-05 Wed 18-46.csv 
-is also a sample of 10K but chains are initialised
-by N(0, 100^2) - this is more interesting when compared to the previous. Tau obviously has higher sample variance 
-- the number of steps before the chains meet (tua-lag) has mean ~200 and std error ~150, 
-This and as seen from the boxplots the IQR is very close to 300 implying that the unlagged chain may not even have 
-reached stationarity before coupling. This explains the quite vacous bound on the TV distance given by the lag 300 sample.
-Also the bound was not effectively zero by 500 iterations for any lag either-whereas it was for the previous set up before.
-
-
-"""
-#plot TV upper bound
-demo_folder = "comp init N1"
-tv_f = read_demo_df_file("tv est 2025-02-04 Tue 13-36.csv", demo_folder)
-#"tv est 2025-02-03 Mon 21-33.csv"#"TV est 2025-01-28 Tue 15-06.csv"#"tv est 2025-01-28 Tue 10-20.csv" 
-def plot_tv_upper_bound(tv_est, title_rv_name):
-    fig , ax1 = plt.subplots(1)
-    ax1.plot(tv_est)
-    ax1.axhline(0,color = "black", ls ="--")
-    ax1.set_title(f"TV upper bound for {title_rv_name}")
-    ax1.legend(tv_est.columns, title = "Lag")
-    ax1.set_ylabel("TV upper bound")
-    ax1.set_xlabel("time t")
-    plt.show()
-
-
-plot_tv_upper_bound(tv_f, "N(3,4)")
-
-# d = pd.read_csv(os.path.join("logs_and_data","tau lag 2025-01-27 Mon 20-19.csv") )
-tau_f = read_demo_df_file("tau lag 2025-02-04 Tue 13-36.csv", demo_folder)
-#"tau lag 2025-02-03 Mon 21-33.csv"#"tau lag 2025-01-28 Tue 15-06.csv" #"tau lag 2025-01-28 Tue 10-20.csv" # 
 def plot_tau_stuff(tau_f, title_rv_name):
     d = tau_f
 
@@ -121,7 +85,46 @@ def plot_tau_stuff(tau_f, title_rv_name):
     ax2.set_title(f"tau-lag")
     plt.show(	)
 
-plot_tau_stuff(tau_f, "N(3,4)")
+def plot_tv_upper_bound(tv_est, title_rv_name):
+    fig , ax1 = plt.subplots(1)
+    ax1.plot(tv_est)
+    ax1.axhline(0,color = "black", ls ="--")
+    ax1.set_title(f"TV upper bound for {title_rv_name}")
+    ax1.legend(tv_est.columns, title = "Lag")
+    ax1.set_ylabel("TV upper bound")
+    ax1.set_xlabel("time t")
+    plt.show()
+
+"""Sample a lot of tau and estimate the TV upper bound for the chains
+
+tv est 2025-02-04 Tue 13-36.csv 
+has a sample of 10K when chains start points are initialised
+by N(0,50^2) 
+
+tv est 2025-02-05 Wed 18-46.csv 
+is also a sample of 10K but chains are initialised
+by N(0, 100^2) - this is more interesting when compared to the previous. Tau obviously has higher sample variance 
+- the number of steps before the chains meet (tua-lag) has mean ~200 and std error ~150, 
+This and as seen from the boxplots the IQR is very close to 300 implying that the unlagged chain may not even have 
+reached stationarity before coupling. This explains the quite vacous bound on the TV distance given by the lag 300 sample.
+Also the bound was not effectively zero by 500 iterations for any lag either-whereas it was for the previous set up before.
+
+
+"""
+#plot TV upper bound
+demo_folder = "comp init N1"
+tv_f = read_demo_df_file("tv est 2025-02-04 Tue 13-36.csv", demo_folder)
+plot_tv_upper_bound(tv_f, "N(3,4) with tight initialisation")
+
+tau_f = read_demo_df_file("tau lag 2025-02-04 Tue 13-36.csv", demo_folder)
+plot_tau_stuff(tau_f, "N(3,4) with tight initialisation")
+
+tv_f = read_demo_df_file("tv est 2025-02-05 Wed 18-46.csv", demo_folder)
+plot_tv_upper_bound(tv_f, "N(3,4) with wider initialisation")
+
+tau_f = read_demo_df_file("tau lag 2025-02-05 Wed 18-46.csv", demo_folder)
+plot_tau_stuff(tau_f, "N(3,4) with wider initialisation")
+
 
 """
 For multivariate norm
