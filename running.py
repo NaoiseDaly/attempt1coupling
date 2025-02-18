@@ -43,6 +43,12 @@ np.random.seed(1345301)
 # print_basic_df_summary(c_sample)
 # print_basic_df_summary(c_sample.iloc[((N-L)//5)+L:])
 
+def read_demo_df_file(f_name, f_subfolder):
+    """convnience function (again) for reading files in the `good samples` folder"""
+    folder = os.path.join("keep_safe", "good samples", f_subfolder)
+    #inside df it will try join f_path to logs_and_data and fail, using just f_path
+    return read_df_file(f_name, folder)
+
 """Sample a lot of tau and estimate the TV upper bound for the chains
 
 tv est 2025-02-04 Tue 13-36.csv 
@@ -60,12 +66,10 @@ Also the bound was not effectively zero by 500 iterations for any lag either-whe
 
 """
 #plot TV upper bound
-
-tv_f = "tv est 2025-02-04 Tue 13-36.csv"
+demo_folder = "comp init N1"
+tv_f = read_demo_df_file("tv est 2025-02-04 Tue 13-36.csv", demo_folder)
 #"tv est 2025-02-03 Mon 21-33.csv"#"TV est 2025-01-28 Tue 15-06.csv"#"tv est 2025-01-28 Tue 10-20.csv" 
-def plot_tv_upper_bound(tv_f, title_rv_name):
-    tv_est = read_df_file(tv_f)
-
+def plot_tv_upper_bound(tv_est, title_rv_name):
     fig , ax1 = plt.subplots(1)
     ax1.plot(tv_est)
     ax1.axhline(0,color = "black", ls ="--")
@@ -79,10 +83,10 @@ def plot_tv_upper_bound(tv_f, title_rv_name):
 plot_tv_upper_bound(tv_f, "N(3,4)")
 
 # d = pd.read_csv(os.path.join("logs_and_data","tau lag 2025-01-27 Mon 20-19.csv") )
-tau_f = "tau lag 2025-02-04 Tue 13-36.csv"
+tau_f = read_demo_df_file("tau lag 2025-02-04 Tue 13-36.csv", demo_folder)
 #"tau lag 2025-02-03 Mon 21-33.csv"#"tau lag 2025-01-28 Tue 15-06.csv" #"tau lag 2025-01-28 Tue 10-20.csv" # 
 def plot_tau_stuff(tau_f, title_rv_name):
-    d = read_df_file(tau_f)
+    d = tau_f
 
     fig , (ax1) = plt.subplots(1)
     for c in d.columns:
@@ -126,14 +130,17 @@ mu = [3,4]; sigma = [[4,1],[1,2]]
 Compared to the univariate example above the chains converge quickly
 The TV bound also appears almost sinusoidal
 """
-tau_f = os.path.join("good samples","N--3-4--4-1-1-2--10Ks",   "tau lag 2025-02-16 Sun 16-28.csv")
-tv_f = os.path.join("good samples", "N--3-4--4-1-1-2--10Ks", "TV est 2025-02-16 Sun 16-28.csv" )
+demo_folder = "N--3-4--4-1-1-2--10Ks"
+
+tau_f = read_demo_df_file("tau lag 2025-02-16 Sun 16-28.csv", demo_folder)
+tv_f = read_demo_df_file("TV est 2025-02-16 Sun 16-28.csv", demo_folder)
 name = r"$N_2(\mu, \Sigma)$"
 plot_tv_upper_bound(tv_f, name)
 plot_tau_stuff(tau_f, name)
 
-tau_f =  "tau lag 2025-02-17 Mon 20-46.csv"
-tv_f =  "TV est 2025-02-17 Mon 20-46.csv" 
+demo_folder = "MVN3-haar-cov"
+tau_f =  read_demo_df_file("tau lag 2025-02-17 Mon 21-38.csv", demo_folder)
+tv_f =  read_demo_df_file("TV est 2025-02-17 Mon 21-38.csv" , demo_folder)
 name = r"$N_3(\mu, \Sigma)$" 
 plot_tv_upper_bound(tv_f, name)
 plot_tau_stuff(tau_f, name)
