@@ -1,0 +1,1 @@
+rsync -ahtlSv  143.239.72.249:attempt1coupling/logs_and_data/ ~/Documents/couplingdata
