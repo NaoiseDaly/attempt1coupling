@@ -1,0 +1,5 @@
+10K samples of tau with lags:300,500,800
+mcmc algo generated from Some_random_Pd_mcmc(p = 3,seed = 5)
+then used within 
+sample_tau_L_for_many_lags
+max_t_iterations = 10**5, starting_random_seed:int= 10101010
