@@ -4,7 +4,7 @@ import seaborn as sns
 import logging
 logger = logging.getLogger(__name__)
 from time import perf_counter
-from scipy.stats import norm, uniform
+from scipy.stats import norm, uniform, multivariate_normal
 from scipy.linalg import toeplitz
 from pandas import DataFrame
 import pandas as pd
@@ -317,3 +317,95 @@ def trace_plot(sample, lag, meeting_time = None):
     ax1.set_xlabel("t")
 
     plt.show()
+
+def just_get_mvn_mcmc_chain( lag = 500, max_t_iterations=10**4, random_state = None):
+    """
+    A quick effort to get the actual chain generated 
+
+    
+    Takes a `random_state` for reproducability
+    """
+    mu  = np.array([3,4,5])
+    P = len(mu)
+    sigma = make_cov_equivar(P,.9,10) # high covariance
+
+    sigma_inv = np.linalg.inv(sigma)
+
+    #initialisation
+    x_chain = np.zeros((max_t_iterations,P))
+    y_chain = np.zeros((max_t_iterations,P))
+    rng = np.random.default_rng(random_state)  
+
+    #mu=0, sd =50 so this is a wide range of starting points
+    x_chain[0], y_chain[0] = multivariate_normal.rvs(size =2  ,cov = (50**2)*np.identity(P), random_state =rng )
+    #theres one spare here just to keep indexing simple
+    log_unifs = np.log(uniform.rvs(size = max_t_iterations+1, random_state = rng)) 
+    
+    """
+    Use a MVN proposal dist
+      centred at the current for symmetry
+      variance is probelem dependent, using 2 units in each direction
+      setting covariances to zero so i dont have to worry about them
+    """
+    #abstraction
+    def proposal_dist_logpdf(current_state):
+        return multivariate_normal(mean = current_state, cov = (2**2)*np.identity(P)).logpdf 
+    def proposal_dist_sampler(current_state):
+        return multivariate_normal(mean = current_state, cov = (2**2)*np.identity(P)).rvs
+    # def log_unnormalised_target_pdf(x): #not needed due to manual simplification of alpha
+    #     pass
+    
+    
+    def log_alpha(current, new):
+        """simplified log of alpha using the function local `mu` and `sigma_inv`"""
+        quad_new = quad_form_mvn(mu, sigma_inv, new)
+        quad_old = quad_form_mvn(mu, sigma_inv, current)
+
+        return min(0, -.5*(quad_new- quad_old))
+
+    # run X chain for lag steps
+    for t in range(1,lag+1):
+        current_state = x_chain[t-1,]
+        proposed_state = proposal_dist_sampler(current_state)(random_state =rng) # looks ugly i know
+
+        if log_unifs[t] <= log_alpha(current_state, proposed_state):
+            x_chain[t,] = proposed_state 
+        else:
+            x_chain[t,] = current_state 
+    
+    meeting_time = None
+    # now run a coupling with the lagged chains
+    for t in range(lag+1, max_t_iterations):
+        current_x = x_chain[t-1,]
+        current_y = y_chain[t-lag-1,] #fingers crossed 
+        
+        proposed_x, proposed_y = max_coupling_algo1(
+            proposal_dist_logpdf(current_x), proposal_dist_logpdf(current_y),
+            proposal_dist_sampler(current_x), proposal_dist_sampler(current_y)
+            ,rng
+        )
+
+        log_u = log_unifs[t] # common random numbers
+
+        if log_u <= log_alpha(current_x, proposed_x):
+            x_chain[t,] = proposed_x
+        else:
+            x_chain[t,] = current_x
+
+        if log_u <= log_alpha(current_y, proposed_y):
+            y_chain[t-lag,] = proposed_y
+        else:
+            y_chain[t-lag,] = current_y
+
+        if not meeting_time and (y_chain[t-lag,] == x_chain[t,]).all() : 
+            # #first time meeting
+            meeting_time = t
+            # break # no need to continue, tau observed
+            print(meeting_time)
+
+    # if meeting_time is None:
+    #     logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
+
+    return x_chain, y_chain[0:(max_t_iterations-lag),]
+
+

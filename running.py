@@ -112,18 +112,18 @@ Also the bound was not effectively zero by 500 iterations for any lag either-whe
 
 """
 #plot TV upper bound
-demo_folder = "comp init N1"
-tv_f = read_demo_df_file("tv est 2025-02-04 Tue 13-36.csv", demo_folder)
-plot_tv_upper_bound(tv_f, "N(3,4) with tight initialisation")
+# demo_folder = "comp init N1"
+# tv_f = read_demo_df_file("tv est 2025-02-04 Tue 13-36.csv", demo_folder)
+# plot_tv_upper_bound(tv_f, "N(3,4) with tight initialisation")
 
-tau_f = read_demo_df_file("tau lag 2025-02-04 Tue 13-36.csv", demo_folder)
-plot_tau_stuff(tau_f, "N(3,4) with tight initialisation")
+# tau_f = read_demo_df_file("tau lag 2025-02-04 Tue 13-36.csv", demo_folder)
+# plot_tau_stuff(tau_f, "N(3,4) with tight initialisation")
 
-tv_f = read_demo_df_file("tv est 2025-02-05 Wed 18-46.csv", demo_folder)
-plot_tv_upper_bound(tv_f, "N(3,4) with wider initialisation")
+# tv_f = read_demo_df_file("tv est 2025-02-05 Wed 18-46.csv", demo_folder)
+# plot_tv_upper_bound(tv_f, "N(3,4) with wider initialisation")
 
-tau_f = read_demo_df_file("tau lag 2025-02-05 Wed 18-46.csv", demo_folder)
-plot_tau_stuff(tau_f, "N(3,4) with wider initialisation")
+# tau_f = read_demo_df_file("tau lag 2025-02-05 Wed 18-46.csv", demo_folder)
+# plot_tau_stuff(tau_f, "N(3,4) with wider initialisation")
 
 
 """
@@ -133,17 +133,31 @@ mu = [3,4]; sigma = [[4,1],[1,2]]
 Compared to the univariate example above the chains converge quickly
 The TV bound also appears almost sinusoidal
 """
-demo_folder = "N--3-4--4-1-1-2--10Ks"
+# demo_folder = "N--3-4--4-1-1-2--10Ks"
 
-tau_f = read_demo_df_file("tau lag 2025-02-16 Sun 16-28.csv", demo_folder)
-tv_f = read_demo_df_file("TV est 2025-02-16 Sun 16-28.csv", demo_folder)
-name = r"$N_2(\mu, \Sigma)$"
-plot_tv_upper_bound(tv_f, name)
-plot_tau_stuff(tau_f, name)
+# tau_f = read_demo_df_file("tau lag 2025-02-16 Sun 16-28.csv", demo_folder)
+# tv_f = read_demo_df_file("TV est 2025-02-16 Sun 16-28.csv", demo_folder)
+# name = r"$N_2(\mu, \Sigma)$"
+# plot_tv_upper_bound(tv_f, name)
+# plot_tau_stuff(tau_f, name)
 
-demo_folder = "MVN3-haar-cov"
-tau_f =  read_demo_df_file("tau lag 2025-02-17 Mon 21-38.csv", demo_folder)
-tv_f =  read_demo_df_file("TV est 2025-02-17 Mon 21-38.csv" , demo_folder)
-name = r"$N_3(\mu, \Sigma)$" 
-plot_tv_upper_bound(tv_f, name)
-plot_tau_stuff(tau_f, name)
+# demo_folder = "MVN3-haar-cov"
+# tau_f =  read_demo_df_file("tau lag 2025-02-17 Mon 21-38.csv", demo_folder)
+# tv_f =  read_demo_df_file("TV est 2025-02-17 Mon 21-38.csv" , demo_folder)
+# name = r"$N_3(\mu, \Sigma)$" 
+# plot_tv_upper_bound(tv_f, name)
+# plot_tau_stuff(tau_f, name)
+
+
+"""
+get a coupled chain from a MVN
+"""
+
+x_chain, y_chain  = just_get_mvn_mcmc_chain(random_state = 1001)
+
+print(y_chain.shape, x_chain.shape )
+y_path  = os.path.join("keep_safe", "3D-MVN-sample", "lagged-chain.csv")
+x_path  = os.path.join("keep_safe", "3D-MVN-sample", "nonlagged-chain.csv")
+
+np.savetxt(fname = y_path,X =  y_chain, delimiter = ",")
+np.savetxt(fname = x_path,X =  x_chain, delimiter = ",")
