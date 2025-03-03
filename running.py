@@ -137,14 +137,14 @@ demo_folder = "N--3-4--4-1-1-2--10Ks"
 
 tau_f = read_demo_df_file("tau lag 2025-02-16 Sun 16-28.csv", demo_folder)
 tv_f = read_demo_df_file("TV est 2025-02-16 Sun 16-28.csv", demo_folder)
-name = r"$N_2(\mu, \Sigma)$"
+name = r"$N_2(\mu, \Sigma)$ target"
 plot_tv_upper_bound(tv_f, name)
 plot_tau_stuff(tau_f, name)
 
 demo_folder = "MVN3-haar-cov"
 tau_f =  read_demo_df_file("tau lag 2025-02-17 Mon 21-38.csv", demo_folder)
 tv_f =  read_demo_df_file("TV est 2025-02-17 Mon 21-38.csv" , demo_folder)
-name = r"$N_3(\mu, \Sigma)$" 
+name = r"$N_3(\mu, \Sigma)$ target" 
 plot_tv_upper_bound(tv_f, name)
 plot_tau_stuff(tau_f, name)
 
