@@ -83,9 +83,6 @@ def run_all_checks():
             safe_test(test, func)
         
 
-
-
-
     test_logger.info("\t finished unit tests \n")
 
 if __name__ == "__main__":

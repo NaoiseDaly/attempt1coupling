@@ -14,7 +14,7 @@ if __name__ == "__main__":
     log_path = make_log_path_str( "MCMCcouplingSimulation.log")
     logging.basicConfig(filename = log_path , level=logging.INFO)
     remote_logger = logging.getLogger(__name__)
-    remote_logger.info("\n") # add a line to seperate this execution from any others
+    remote_logger.info("\nCreating Unit Test data") # add a line to seperate this execution from any others
     
     #original mcmc algorithms
     for algo in [modified_coupled_MCMC2, mvn_2d_mcmc,
