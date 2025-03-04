@@ -334,3 +334,15 @@ class Some_random_Pd_mcmc:
             self.__mu, self.__sigma,
             *args
         )
+   
+
+class high_autocorrelated_mvn(Some_random_Pd_mcmc):
+    """Want mcmc on a normal with high autocorrelation"""
+
+    def __init__(self, p, seed):
+        super().__init__(p, seed)
+        #dont care about mu override Sigma
+        rng = np.random.default_rng(seed)
+        cov_seed = rng.integers(0, 10**6, size = 1)[0]
+        scale = np.median(self.__mu) #why not, makes the variance large
+        self.__sigma = make_cov_equivar(cov_seed, p, 1/scale)
