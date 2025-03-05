@@ -13,7 +13,7 @@ def get_big_mcmc_sample():
     tau_data = sample_tau_L_for_many_lags(
         mvn,
         lags = [300, 500, 800, 1100],
-        num_tau_samples = 1_0)
+        num_tau_samples = 10_000)
     print_basic_df_summary(tau_data)
     f_name = save_df_with_timestamp(tau_data, f"{mvn.__name__}-tau-data")
     remote_logger.info(f"tau samples saved to {f_name}")
