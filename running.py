@@ -49,7 +49,7 @@ def read_demo_df_file(f_name, f_subfolder):
     #inside df it will try join f_path to logs_and_data and fail, using just f_path
     return read_df_file(f_name, folder)
 
-def plot_tau_stuff(tau_f, title_rv_name):
+def plot_tau_stuff(tau_f, title_rv_name= ""):
     d = tau_f
 
     fig , (ax1) = plt.subplots(1)
@@ -85,7 +85,7 @@ def plot_tau_stuff(tau_f, title_rv_name):
     ax2.set_title(f"tau-lag")
     plt.show(	)
 
-def plot_tv_upper_bound(tv_est, title_rv_name):
+def plot_tv_upper_bound(tv_est, title_rv_name=""):
     fig , ax1 = plt.subplots(1)
     ax1.plot(tv_est)
     ax1.axhline(0,color = "black", ls ="--")
@@ -133,20 +133,20 @@ mu = [3,4]; sigma = [[4,1],[1,2]]
 Compared to the univariate example above the chains converge quickly
 The TV bound also appears almost sinusoidal
 """
-demo_folder = "N--3-4--4-1-1-2--10Ks"
+# demo_folder = "N--3-4--4-1-1-2--10Ks"
 
-tau_f = read_demo_df_file("tau lag 2025-02-16 Sun 16-28.csv", demo_folder)
-tv_f = read_demo_df_file("TV est 2025-02-16 Sun 16-28.csv", demo_folder)
-name = r"$N_2(\mu, \Sigma)$ target"
-plot_tv_upper_bound(tv_f, name)
-plot_tau_stuff(tau_f, name)
+# tau_f = read_demo_df_file("tau lag 2025-02-16 Sun 16-28.csv", demo_folder)
+# tv_f = read_demo_df_file("TV est 2025-02-16 Sun 16-28.csv", demo_folder)
+# name = r"$N_2(\mu, \Sigma)$ target"
+# plot_tv_upper_bound(tv_f, name)
+# plot_tau_stuff(tau_f, name)
 
-demo_folder = "MVN3-haar-cov"
-tau_f =  read_demo_df_file("tau lag 2025-02-17 Mon 21-38.csv", demo_folder)
-tv_f =  read_demo_df_file("TV est 2025-02-17 Mon 21-38.csv" , demo_folder)
-name = r"$N_3(\mu, \Sigma)$ target" 
-plot_tv_upper_bound(tv_f, name)
-plot_tau_stuff(tau_f, name)
+# demo_folder = "MVN3-haar-cov"
+# tau_f =  read_demo_df_file("tau lag 2025-02-17 Mon 21-38.csv", demo_folder)
+# tv_f =  read_demo_df_file("TV est 2025-02-17 Mon 21-38.csv" , demo_folder)
+# name = r"$N_3(\mu, \Sigma)$ target" 
+# plot_tv_upper_bound(tv_f, name)
+# plot_tau_stuff(tau_f, name)
 
 
 """
@@ -161,3 +161,17 @@ get a coupled chain from a MVN
 
 # np.savetxt(fname = y_path,X =  y_chain, delimiter = ",")
 # np.savetxt(fname = x_path,X =  x_chain, delimiter = ",")
+
+
+"""
+looking at lagged coupled chain that has been ran for 10x burnin of 857
+target is highly correlated mvn3
+"""
+
+tau_data = read_df_file("high_autocorrelated_mvn-P3-Seed42-tau-data 2025-03-05 Wed 13-01.csv")
+
+title = r"high autocor $N_3(\mu,\Sigma)$"
+# plot_tau_stuff(tau_data,title)
+
+tv_ests = read_df_file("high_autocorrelated_mvn-P3-Seed42-tv-ests 2025-03-05 Wed 13-01.csv")
+plot_tv_upper_bound(tv_ests, title)
