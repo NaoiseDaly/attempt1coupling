@@ -1,4 +1,4 @@
-from functions import print_basic_df_summary, save_df_with_timestamp, estimate_TV_from_file
+from functions import print_basic_df_summary, save_df_with_timestamp, estimate_TV_from_file, make_timestamp
 from generate_tau_samples import *
 from unit_tests import run_all_checks
 import logging, os.path
@@ -38,8 +38,9 @@ def get_big_mcmc_sample():
         ,random_state = 500_0_005
         )
 
-    y_path = os.path.join("logs_and_data", f"{mvn.__name__}_lagged_chain.csv" )
-    x_path = os.path.join("logs_and_data", f"{mvn.__name__}_unlagged_chain.csv" )
+    stamp = make_timestamp()
+    y_path = os.path.join("logs_and_data", f"{mvn.__name__}_lagged_chain_{stamp}.csv" )
+    x_path = os.path.join("logs_and_data", f"{mvn.__name__}_unlagged_chain{stamp}.csv" )
     np.savetxt(fname = y_path,X =  y_chain, delimiter = ",")
     np.savetxt(fname = x_path,X =  x_chain, delimiter = ",")
 
