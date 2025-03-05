@@ -30,7 +30,8 @@ def get_big_mcmc_sample():
 
 
     #in case this is comp heavy id like to do it on the remote
-    f_name = estimate_TV_from_file(f_name, int(burn_in*1.2), f"{mvn.__name__}-tv-ests")
+    # setting t in the range 1.5 * burn in is arbitarty
+    f_name = estimate_TV_from_file(f_name, int(burn_in*1.5), f"{mvn.__name__}-tv-ests")
     remote_logger.info(f"Tv estimates saved to {f_name}")
 
 
