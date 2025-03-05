@@ -223,7 +223,7 @@ def mvn_2d_mcmc(lag:int, max_t_iterations=10**3, random_state = None):
 
     return meeting_time
 
-def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**4, random_state = None):
+def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**4, random_state = None, return_chain = False):
     """
     returns tau, the first meeting time, from a coupling of 
     two Pd norms with identical `mu` and `sigma` specified with lag `lag`.
@@ -303,12 +303,19 @@ def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**4, random_state = None)
         if not meeting_time and (y_chain[t-lag,] == x_chain[t,]).all() : 
             #first time meeting
             meeting_time = t
-            break # no need to continue, tau observed
+
+            if not return_chain:
+                break # no need to continue, tau observed
 
     if meeting_time is None:
         logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
 
-    return meeting_time
+    if return_chain:
+        if meeting_time:
+            logger.info(f"{meeting_time=}")
+        return x_chain, y_chain[0:(max_t_iterations-lag),]
+    else:
+        return meeting_time
 
 class Some_random_Pd_mcmc:
     """
@@ -319,20 +326,26 @@ class Some_random_Pd_mcmc:
     """
     def __init__(self, p, seed):
         rng = np.random.default_rng(seed)
-        self.__mu = rng.uniform(-10**2, 10**2, size = p)
+        self._mu = rng.uniform(-10**2, 10**2, size = p)
         scale = rng.poisson(5, size=1)[0]
         cov_seed = rng.integers(0, 10**6, size = 1)[0]
-        self.__sigma = make_cov_haar(cov_seed, p, 1/scale)
+        self._sigma = make_cov_haar(cov_seed, p, 1/scale)
 
         #to use Java terms, defining a __name__ so that the class has a similar interface
         #to a function
         #adding in its initialisation args, to distinguish it from other instances
         self.__name__ = f"{self.__class__.__name__}-P{p}-Seed{seed}"
 
-    def __call__(self,*args):
+    def __call__(self,*args, **kwargs):
         return mvn_Pd_mcmc(
-            self.__mu, self.__sigma,
-            *args
+            self._mu, self._sigma,
+            *args, **kwargs
+        )
+    
+    def generate_mcmc_sample(self, *args, **kwargs):
+        return mvn_Pd_mcmc(
+            self._mu, self._sigma,
+            *args, **kwargs
         )
    
 
@@ -342,7 +355,5 @@ class high_autocorrelated_mvn(Some_random_Pd_mcmc):
     def __init__(self, p, seed):
         super().__init__(p, seed)
         #dont care about mu override Sigma
-        rng = np.random.default_rng(seed)
-        cov_seed = rng.integers(0, 10**6, size = 1)[0]
-        scale = np.median(self.__mu) #why not, makes the variance large
-        self.__sigma = make_cov_equivar(cov_seed, p, 1/scale)
+        scale = np.median(self._mu) #why not, makes the variance large
+        self._sigma = make_cov_equivar(p, .9, 1/scale)
