@@ -171,7 +171,7 @@ target is highly correlated mvn3
 tau_data = read_df_file("high_autocorrelated_mvn-P3-Seed42-tau-data 2025-03-05 Wed 13-01.csv")
 
 title = r"high autocor $N_3(\mu,\Sigma)$"
-# plot_tau_stuff(tau_data,title)
+plot_tau_stuff(tau_data,title)
 
 tv_ests = read_df_file("high_autocorrelated_mvn-P3-Seed42-tv-ests 2025-03-05 Wed 13-01.csv")
 plot_tv_upper_bound(tv_ests, title)
