@@ -318,6 +318,27 @@ def trace_plot(sample, lag, meeting_time = None):
 
     plt.show()
 
+def trace_plot2(x:np.array,y:np.array,lag,  meeting_time = None):
+
+    fig, ax1 = plt.subplots()
+
+    ax1.set_title(f"Coupled chains with a lag of {lag}")
+
+    y_shifted = np.pad(y,((lag,0),(0,0)), mode = "constant", constant_values = np.nan)
+    print(y_shifted.shape)
+    ax1.plot(x,  "r")
+    ax1.plot(y_shifted,  "b")
+    ax1.set_xlabel("time")
+
+    if meeting_time:
+        ax1.axvline(x = meeting_time, ls = "dashed", color = "blue")
+    
+    ax1.legend(labels = ["Un-lagged","lagged"])
+
+
+    plt.show()
+
+
 def just_get_mvn_mcmc_chain( lag = 500, max_t_iterations=10**4, random_state = None):
     """
     A quick effort to get the actual chain generated 
