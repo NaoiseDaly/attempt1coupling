@@ -26,7 +26,7 @@ def animate_L2_dist_of_chains(x_c, y_c, lag, title = ""):
     ax.set_ylabel(
         r"$L_2$ Norm"
     )
-    ax.set_xlabel("time + lag")
+    ax.set_xlabel("time")
     if title:
         ax.set_title(title)
     else:
@@ -41,7 +41,7 @@ def animate_L2_dist_of_chains(x_c, y_c, lag, title = ""):
     dists = dists[~np.isnan(dists)]
 
     #lines
-    ax.axhline()#zero line for reference
+    ax.axhline(color = "black", ls = "--")#zero line for reference
     dist_line = ax.plot(times[0], dists[0], "r-")[0]
 
 
@@ -72,32 +72,48 @@ def animate_L2_dist_of_chains(x_c, y_c, lag, title = ""):
     ani = animation.FuncAnimation(fig=fig, func=update, frames=dists.shape[0]-1, interval=60)
     plt.show()
 
-def animate_chains_meeting(x_chain, y_chain_shifted, title=""):
+def animate_univariate_chains_meeting(x_chain, y_chain_shifted, title=""):
 
-    #got to be univariate before squeezing
+    #got to be univariate
     assert x_chain.shape[1] == 1 and y_chain_shifted.shape[1] == 1
     x_chain, y_chain_shifted = np.squeeze(x_chain), np.squeeze(y_chain_shifted)
 
     fig, ax = plt.subplots()
 
-    ax.set_ylabel("State space" )
-    ax.set_xlabel("time + lag")
-    if title:
-        ax.set_title(title)
-    else:
-        ax.set_title(
-            f"coupled chains with a lag of {lag}"
-        )
+    # ax.set_ylabel("State space" )
+    # ax.set_xlabel("time")
+    # if title:
+    #     ax.set_title(title)
+    # else:
+    #     ax.set_title(
+    #         f"coupled chains with a lag of {lag}"
+    #     )
 
     #need to save the lines added
-    scat1 = ax.plot(x_chain[0], "r")[0]
-    scat2 = ax.plot(y_chain_shifted[0], "b")[0]
+    scat1 = ax.plot(x_chain[0] ,color = "red",label = "Unlagged chain")[0]
+    scat2 = ax.plot(y_chain_shifted[0], color ="blue",label = "Lagged chain")[0]
 
-    y_min = x_chain[0]
-    y_max = x_chain[0]
-    y_min = y_min - .1*abs(y_min)
-    y_max = y_max + .1*abs(y_max)
-    ax.set(xlim = (0,1), ylim = (y_min, y_max))
+    leg = ax.legend()
+
+    def init():
+        ax.set_ylabel("State space" )
+        ax.set_xlabel("time")
+        if title:
+            ax.set_title(title)
+        else:
+            ax.set_title(
+                f"coupled chains with a lag of {lag}"
+            )
+
+        scat1.set_color("red")
+        scat2.set_color("blue")
+        
+
+        y_min = x_chain[0]
+        y_max = x_chain[0]
+        y_min = y_min - .1*abs(y_min)
+        y_max = y_max + .1*abs(y_max)
+        ax.set(xlim = (0,1), ylim = (y_min, y_max))
 
     def update(frame):
         frame+=1 # frame is 0 indexed, cba dealing with empty arrays
@@ -107,6 +123,10 @@ def animate_chains_meeting(x_chain, y_chain_shifted, title=""):
 
         scat1.set_data(range(frame), new_x_chain)
         scat2.set_data(range(frame), new_y_chain)
+        
+        if new_x_chain[-1] == new_y_chain[-1]:
+            scat1.set_color("purple")
+            scat2.set_color("purple")
 
         #so a np.nan seems to be nilpotent which makes a min/max call useless
         #an empty array also seems to break a min/max call
@@ -127,7 +147,8 @@ def animate_chains_meeting(x_chain, y_chain_shifted, title=""):
         return (scat1, scat2)
 
 
-    ani = animation.FuncAnimation(fig=fig, func=update, frames=x_chain.shape[0]-1, interval=60)
+    ani = animation.FuncAnimation(fig=fig, func=update, init_func = init
+                                  , frames=x_chain.shape[0]-1, interval=60)
     plt.show()
 
 
@@ -167,5 +188,21 @@ def plt_example():
 if __name__ == "__main__":
     x, y, lag = get_univariate_coupled_chain()
     print(x.shape,y.shape)
-    animate_chains_meeting(x,y)
+    animate_univariate_chains_meeting(x,y)
     animate_L2_dist_of_chains(x,y, lag)
+
+    y = np.genfromtxt(
+        os.path.join("keep_safe","3D-MVN-sample","lagged-chain.csv")
+        ,delimiter = ","
+    )
+    x = np.genfromtxt(
+        os.path.join("keep_safe","3D-MVN-sample","nonlagged-chain.csv")
+        ,delimiter = ","
+    )
+
+    print(x.shape,y.shape)
+    lag = 500
+    y = np.pad(y,((lag,0),(0,0)), mode = "constant", constant_values = np.nan)
+    print(x.shape,y.shape)
+    animate_L2_dist_of_chains(x,y,lag)
+    
