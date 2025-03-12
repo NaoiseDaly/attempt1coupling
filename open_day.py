@@ -188,7 +188,8 @@ def plt_example():
 if __name__ == "__main__":
     x, y, lag = get_univariate_coupled_chain()
     print(x.shape,y.shape)
-    animate_univariate_chains_meeting(x,y)
+    title = fr"Coupled chains with lag {lag} targeting $N(\mu=77, \sigma^2=6)$"
+    animate_univariate_chains_meeting(x,y, title)
     animate_L2_dist_of_chains(x,y, lag)
 
     y = np.genfromtxt(
@@ -204,5 +205,5 @@ if __name__ == "__main__":
     lag = 500
     y = np.pad(y,((lag,0),(0,0)), mode = "constant", constant_values = np.nan)
     print(x.shape,y.shape)
-    animate_L2_dist_of_chains(x,y,lag)
+    # animate_L2_dist_of_chains(x,y,lag)
     
