@@ -43,57 +43,6 @@ np.random.seed(1345301)
 # print_basic_df_summary(c_sample)
 # print_basic_df_summary(c_sample.iloc[((N-L)//5)+L:])
 
-def read_demo_df_file(f_name, f_subfolder):
-    """convnience function (again) for reading files in the `good samples` folder"""
-    folder = os.path.join("keep_safe", "good samples", f_subfolder)
-    #inside df it will try join f_path to logs_and_data and fail, using just f_path
-    return read_df_file(f_name, folder)
-
-def plot_tau_stuff(tau_f, title_rv_name= ""):
-    d = tau_f
-
-    fig , (ax1) = plt.subplots(1)
-    for c in d.columns:
-        xs = d[c] -int(c) #tau - lag
-        ax1.ecdf(xs, complementary  = True )
-
-    ax1.set_title(f"ECCDF of tau for {title_rv_name}")
-    ax1.set_xlabel("tau - lag")
-    ax1.legend(d.columns, title = "lag")
-    ax1.set_yscale("log")
-    plt.show()
-
-    # #show them indivivdually
-    # for col in d.columns:
-    #     fig , ax1 = plt.subplots(1)
-    #     xs = d[col] -int(col) #tau - lag
-    #     ax1.ecdf(xs, complementary  = True )
-
-    #     ax1.set_title(f"ECCDF of tau when lag is {col}")
-    #     ax1.set_xlabel("tau - lag")
-    #     ax1.set_yscale("log")
-    #     plt.show()
-
-    #examine tau
-    shifted = d.apply(lambda s:s -int(s.name), axis = 0)
-    # print_basic_df_summary(shifted)
-    fig , (ax1, ax2) = plt.subplots(1,2)
-    fig.suptitle(title_rv_name)
-    ax1.boxplot(d, tick_labels = d.columns)
-    ax1.set_title("tau")
-    ax2.boxplot(shifted, tick_labels = d.columns)
-    ax2.set_title(f"tau-lag")
-    plt.show(	)
-
-def plot_tv_upper_bound(tv_est, title_rv_name=""):
-    fig , ax1 = plt.subplots(1)
-    ax1.plot(tv_est)
-    ax1.axhline(0,color = "black", ls ="--")
-    ax1.set_title(f"TV upper bound for {title_rv_name}")
-    ax1.legend(tv_est.columns, title = "Lag")
-    ax1.set_ylabel("TV upper bound")
-    ax1.set_xlabel("time t")
-    plt.show()
 
 """Sample a lot of tau and estimate the TV upper bound for the chains
 
