@@ -319,10 +319,7 @@ def mvn_Pd_mcmc(mu, sigma, lag:int, max_t_iterations=10**4, random_state = None,
 
 class Some_random_Pd_mcmc:
     """
-    This is basically a wrapper.
-    `sample_tau_L_for_many_lags ` needs a function of this form and im not rewriting `sample_tau_L_for_many_lags`
-
-    Life is now complicated.
+    This is basically a wrapper for creating a random MVN target in MCMC
     """
     def __init__(self, p, seed):
         rng = np.random.default_rng(seed)
@@ -330,11 +327,24 @@ class Some_random_Pd_mcmc:
         scale = rng.poisson(5, size=1)[0]
         cov_seed = rng.integers(0, 10**6, size = 1)[0]
         self._sigma = make_cov_haar(cov_seed, p, 1/scale)
+        self._p = p
+        self._init_seed = seed
 
         #to use Java terms, defining a __name__ so that the class has a similar interface
         #to a function
         #adding in its initialisation args, to distinguish it from other instances
         self.__name__ = f"{self.__class__.__name__}-P{p}-Seed{seed}"
+
+    def __str__(self):
+        text = self.__name__
+        
+        if self._p ==1:
+            #get a bit more info
+            mu = self._mu[0]
+            sigma_squared = self._sigma[0][0]
+            text += f"mu{mu}-var{sigma_squared}"
+        
+        return text
 
     def __call__(self,*args, **kwargs):
         return mvn_Pd_mcmc(
