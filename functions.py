@@ -324,8 +324,7 @@ def trace_plot2(x:np.array,y:np.array,lag,  meeting_time = None):
 
     ax1.set_title(f"Coupled chains with a lag of {lag}")
 
-    y_shifted = np.pad(y,((lag,0),(0,0)), mode = "constant", constant_values = np.nan)
-    print(y_shifted.shape)
+    y_shifted = np.pad(y,(lag,0), mode = "constant", constant_values = np.nan)
     ax1.plot(x,  "r")
     ax1.plot(y_shifted,  "b")
     ax1.set_xlabel("time")
