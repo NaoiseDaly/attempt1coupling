@@ -410,6 +410,7 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
     """
     Single chain target joint posterior in 8 schools problem
     """
+    ind_counts = []
     #set up
     p = 8+2 #group means plus mu plus tau
     meeting_time = None
@@ -426,7 +427,7 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
     y_chain[0,p-1] = uniform.rvs(loc =1, scale =30, random_state =rng)#make sure population variance is positive
 
     #handy to have
-    def get_total_precision_and_precision_weighted_average(tau:float):
+    def get_v_mu_and_mu_hat_given_tau(tau:float):
 
         total_precision = np.sum( 1/(tau**2 +DATA["sigma.j"]**2)  )
 
@@ -435,67 +436,63 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
 
         return total_precision, precision_weighted_average
 
-    def log_unnormalised_target(state):
-        mu, tau = current_state[8], current_state[9]
+    def get_v_j_and_theta_j_hat_given_hypparams(mu, tau, index):
+            sample_mean = DATA["yBar.j"][index]
+            sigma_sq = DATA["sigma.j"][index]**2
+            tau_sq = tau**2
+            var = 1/( (1/sigma_sq)+(1/tau_sq) )
+            theta_j = ( (sample_mean/sigma_sq)+(mu/tau_sq) )*var
 
-        #tau part 
-        #taken from 8schools project
-        if tau <= 0:
-            tau_part = -np.inf #log of zero
-        
-        total_prec, mu_hat = get_total_precision_and_precision_weighted_average(tau)
+            return var, theta_j
 
-        log_total_prec = np.log(total_prec)
+    def log_unnormalised_target2(state, index):
+            mu, tau = state[8], state[9]
+            v_mu, mu_hat = get_v_mu_and_mu_hat_given_tau(tau)
 
-        big_sum = np.log(DATA["sigma.j"]**2 + tau**2) + (DATA["yBar.j"] - mu_hat)**2/(DATA["sigma.j"]**2 + tau**2)
-        big_sum = np.sum(big_sum)
+            #mu part Normal conditioned on tau
+            #the exp bit of a normal
+            if index ==8:
+                return -.5*v_mu*((mu-mu_hat)**2)
 
-        tau_part =  -.5*( log_total_prec + big_sum )
+            #tau part 
+            if index ==9:
+                if tau <= 0:
+                    return -np.inf #log of zero
+                else:
+                    log_total_prec = np.log(v_mu)
 
-        # group parts
-        #may as well use a func since they are normal given hyperparams
-        groups_part = 0
-        for j in range(0,8):
-            x_bar = DATA["yBar.j"][j]
-            sigma = DATA["sigma.j"][j]
-            v_j = 1/( (1/sigma)+(1/tau) )
-            theta_j = ( (x_bar/sigma)+(mu/tau) )*v_j
+                    big_sum = np.log(DATA["sigma.j"]**2 + tau**2) + (DATA["yBar.j"] - mu_hat)**2/(DATA["sigma.j"]**2 + tau**2)
+                    big_sum = np.sum(big_sum)
 
-            groups_part +=  norm(loc = theta_j, scale = v_j**.5).logpdf(state[j])
+                    return -.5*( log_total_prec + big_sum )
 
-        #mu part
-        #the exp bit of a normal
-        mu_part = -.5*total_prec*((mu-mu_hat)**2)
+            # group parts Normal conditioned on mu, tau
+            var, theta_j = get_v_j_and_theta_j_hat_given_hypparams(mu, tau, index)
+            #the exp bit of a normal
+            return -.5*(1/var)*((state[index]-theta_j)**2)
 
 
-        return mu_part+tau_part+groups_part
-
-    def log_alpha(current, new):
-        r = log_unnormalised_target(new)-log_unnormalised_target(current)
+    def log_alpha(current, new, index):
+        r = log_unnormalised_target2(new, index)-log_unnormalised_target2(current,index)
         return min(0, r)
 
     #abstraction
     #get the proposal distribution for each component
-    #then in the two other functions either get a sampler or log density
     def proposal_general(index, current_state):
     
         mu, tau = current_state[8], current_state[9]
         if index <=7:#group effects
-            x_bar = DATA["yBar.j"][index]
-            sigma = DATA["sigma.j"][index]
-            v_j = 1/( (1/sigma)+(1/tau) )
-            theta_j = ( (x_bar/sigma)+(mu/tau) )*v_j
-
+            v_j, theta_j = get_v_j_and_theta_j_hat_given_hypparams(mu, tau, index)
             return norm(loc = theta_j, scale = v_j**.5)
         
         elif index == 8:#population mean
-            #taken from 8schools project 
-            total_precision, precision_weighted_average = get_total_precision_and_precision_weighted_average(tau)
+            total_precision, precision_weighted_average = get_v_mu_and_mu_hat_given_tau(tau)
             return norm(loc = precision_weighted_average, scale = total_precision**-.5)
         
         elif index == 9:#population variance
-            return norm(loc = tau, scale =50)
-    
+            return norm(loc = tau, scale =5)
+        
+    #then in the two other functions either get a sampler or log density
     def proposal_dist_logpdf(index, current_state):
         return proposal_general(index, current_state).logpdf
     def proposal_dist_sampler(index, current_state):
@@ -503,47 +500,44 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
 
     #run X chain for lag steps
     for t in range(1,lag+1):
-
         current_state = x_chain[t-1,]
-        proposed_state = current_state
 
+        proposed_state = current_state.copy()
         #update a randomly selected component
-        index = rng.choice(p,1)
+        index = rng.choice(p,1)[0]
         proposed_state[index] = proposal_dist_sampler(index, current_state)(random_state=rng)
 
         #accept/reject
         log_u = log_unifs[t]
-        if log_u <= log_alpha(current_state, proposed_state):
+        if log_u <= log_alpha(current_state, proposed_state, index):
             x_chain[t] = proposed_state
         else:
             x_chain[t] = current_state
     
     #couple the chains
     for t in range(lag+1, max_t_iterations):
+        current_x, current_y = x_chain[t-1], y_chain[t-lag-1]
 
-        current_x, current_y = x_chain[t], y_chain[t-lag]
-        proposed_x, proposed_y = current_x, current_y
-
+        proposed_x, proposed_y = current_x.copy(), current_y.copy()
         #update a randomly selected component
-        index = rng.choice(p,1)
-
+        index = rng.choice(p,1)[0]
         new_comp_x, new_comp_y = max_coupling_algo1(
                 proposal_dist_logpdf(index, current_x)
                 ,proposal_dist_logpdf(index, current_y)
                 ,proposal_dist_sampler(index, current_x)
-                ,proposal_dist_sampler(index, current_x)
+                ,proposal_dist_sampler(index, current_y)
                 ,rng             
         )
         proposed_x[index], proposed_y[index] = new_comp_x, new_comp_y 
-
+        
         #accept/reject with common random numbers
         log_u = log_unifs[t]
 
-        if log_u <= log_alpha(current_x, proposed_x):
+        if log_u <= log_alpha(current_x, proposed_x, index):
             x_chain[t] = proposed_x
         else:
             x_chain[t] = current_x
-        if log_u <= log_alpha(current_y, proposed_y):
+        if log_u <= log_alpha(current_y, proposed_y, index):
             y_chain[t-lag] = proposed_y
         else:
             y_chain[t-lag] = current_y
@@ -557,7 +551,7 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
 
     if meeting_time is None:
         logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
-
+    
     if return_chain:
         if meeting_time:
             logger.info(f"{meeting_time=}")
@@ -565,3 +559,17 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
         return x_chain, y_chain[0:(max_t_iterations-lag),]
     else:
         return meeting_time
+    
+
+if __name__ == "__main__":
+    N= 10_000
+    lag = N//10
+    burn_in =N//5
+    x, y = at1_8schools_coupled_mcmc(lag, 55, max_t_iterations =N ,  return_chain =True)
+    from functions import trace_plot2
+    for comp in range(x.shape[1]):
+        trace_plot2(x[burn_in:,comp], y[burn_in:,comp], lag)
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    sns.histplot(x[:,9], bins = 30)
+    plt.show()
