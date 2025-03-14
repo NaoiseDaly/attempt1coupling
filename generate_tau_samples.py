@@ -431,9 +431,30 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
 
     #abstraction
     def proposal_dist_logpdf(index, current_state):
-        pass
+        mu, tau = current_state[8], current_state[9]
+        if index <=7:#group effects
+            x_bar = DATA[index,"yBar.j"]
+            sigma = DATA[index, "sigma.j"]
+            v_j = 1/( (1/sigma)+(1/tau) )
+            theta_j = ( (x_bar/sigma)+(mu/tau) )*v_j
+
+            return norm(loc = theta_j, scale = v_j**.5).rvs
+        elif index == 8:#population mean
+                #taken from 8schools project 
+                total_precision = np.sum( 1/(tau**2 +DATA["sigma.j"]**2)  )
+                average = np.sum(DATA["yBar.j"]/(tau**2 +DATA["sigma.j"]**2 ) )
+                precision_weighted_average = average/total_precision
+
+                return norm(loc = precision_weighted_average, scale = total_precision**-.5).rvs
+        elif index == 9:#population variance
+            pass
     def proposal_dist_sampler(index, current_state):
-        pass
+        if index <=7:#group effects
+            pass
+        elif index == 8:#population mean
+            pass
+        elif index == 9:#population variance
+            pass
 
     #run X chain for lag steps
     for t in range(1,lag+1):
