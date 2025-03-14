@@ -1,5 +1,5 @@
 import numpy as np
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 import multiprocessing
 from time import perf_counter
 from scipy.stats import norm, uniform, multivariate_normal
@@ -358,7 +358,6 @@ class Some_random_Pd_mcmc:
             *args, **kwargs
         )
    
-
 class high_autocorrelated_mvn(Some_random_Pd_mcmc):
     """Want mcmc on a normal with high autocorrelation"""
 
@@ -367,3 +366,136 @@ class high_autocorrelated_mvn(Some_random_Pd_mcmc):
         #dont care about mu override Sigma
         scale = np.median(self._mu) #why not, makes the variance large
         self._sigma = make_cov_equivar(p, .9, 1/scale)
+
+def at1_8schools_mcmc(random_state, max_t_iterations=10**4):
+    """
+    Single chain target joint posterior in 8 schools problem
+    """
+    #set up
+    p = 8+2 #group means plus mu plus tau
+    rng = np.random.default_rng(random_state)
+    log_unifs = np.log(uniform.rvs(size = max_t_iterations+1, random_state = rng)) 
+
+    chain = np.zeros(shape=(max_t_iterations,p))
+    #could do this based on estimates from data
+    chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p), random_state =rng)
+    chain[0,p-1] = uniform.rvs(loc =1, scale =30, random_state =rng)#make sure population variance is positive
+
+    def log_alpha(current, new):
+        pass
+
+    def proposal_dist_sampler(index, current):
+        pass
+
+    for t in range(1,max_t_iterations):
+
+        current_state = chain[t-1,]
+        proposed_state = current_state
+
+        #update a randomly selected component
+        chosen_index = rng.choice(p,1)
+        proposed_state[chosen_index] = proposal_dist_sampler(chosen_index, current_state)
+
+        #accept/reject
+        log_u = log_unifs[t]
+        if log_alpha(current_state, proposed_state) < log_u:
+            chain[t] = proposed_state
+        else:
+            chain[t] = current_state
+    
+    return chain
+
+
+def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, return_chain =False):
+    """
+    Single chain target joint posterior in 8 schools problem
+    """
+    #set up
+    p = 8+2 #group means plus mu plus tau
+    meeting_time = None
+    DATA = read_csv("data.txt")
+
+    rng = np.random.default_rng(random_state)
+    log_unifs = np.log(uniform.rvs(size = max_t_iterations+1, random_state = rng)) 
+
+    x_chain, y_chain = np.zeros(shape=(max_t_iterations,p)), np.zeros(shape=(max_t_iterations,p))
+    #could do this based on estimates from data
+    x_chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p), random_state =rng)
+    x_chain[0,p-1] = uniform.rvs(loc =1, scale =30, random_state =rng)#make sure population variance is positive
+    y_chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p), random_state =rng)
+    y_chain[0,p-1] = uniform.rvs(loc =1, scale =30, random_state =rng)#make sure population variance is positive
+
+
+    def log_alpha(current, new):
+        pass
+
+    #abstraction
+    def proposal_dist_logpdf(index, current_state):
+        pass
+    def proposal_dist_sampler(index, current_state):
+        pass
+
+    #run X chain for lag steps
+    for t in range(1,lag+1):
+
+        current_state = x_chain[t-1,]
+        proposed_state = current_state
+
+        #update a randomly selected component
+        index = rng.choice(p,1)
+        proposed_state[index] = proposal_dist_sampler(index, current_state)
+
+        #accept/reject
+        log_u = log_unifs[t]
+        if log_u <= log_alpha(current_state, proposed_state):
+            x_chain[t] = proposed_state
+        else:
+            x_chain[t] = current_state
+    
+    #couple the chains
+    for t in range(lag+1, max_t_iterations):
+
+        current_x, current_y = x_chain[t], y_chain[t]
+        proposed_x, proposed_y = current_x, current_y
+
+        #update a randomly selected component
+        index = rng.choice(p,1)
+
+        new_comp_x, new_comp_y = max_coupling_algo1(
+                proposal_dist_logpdf(index, current_x)
+                ,proposal_dist_logpdf(index, current_y)
+                ,proposal_dist_sampler(index, current_x)
+                ,proposal_dist_sampler(index, current_x)
+                ,rng             
+        )
+        proposed_x[index], proposed_y[index] = new_comp_x, new_comp_y 
+
+        #accept/reject with common random numbers
+        log_u = log_unifs[t]
+
+        if log_u <= log_alpha(current_x, proposed_x):
+            x_chain[t] = proposed_x
+        else:
+            x_chain[t] = current_x
+        if log_u <= log_alpha(current_y, proposed_y):
+            y_chain[t] = proposed_y
+        else:
+            y_chain[t] = current_y
+
+        #check for meeting
+        if not meeting_time and (y_chain[t-lag,] == x_chain[t,]).all() : 
+            #first time meeting
+            meeting_time = t
+            if not return_chain:
+                break # no need to continue, tau observed
+
+    if meeting_time is None:
+        logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
+
+    if return_chain:
+        if meeting_time:
+            logger.info(f"{meeting_time=}")
+        #get rid of the initialised bits of Y never populated
+        return x_chain, y_chain[0:(max_t_iterations-lag),]
+    else:
+        return meeting_time
