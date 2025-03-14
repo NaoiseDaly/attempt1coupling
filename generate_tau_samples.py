@@ -413,48 +413,93 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
     #set up
     p = 8+2 #group means plus mu plus tau
     meeting_time = None
-    DATA = read_csv("data.txt")
+    DATA = read_csv(os.path.join("keep_safe","8SchoolsData.txt"))
 
     rng = np.random.default_rng(random_state)
     log_unifs = np.log(uniform.rvs(size = max_t_iterations+1, random_state = rng)) 
 
     x_chain, y_chain = np.zeros(shape=(max_t_iterations,p)), np.zeros(shape=(max_t_iterations,p))
     #could do this based on estimates from data
-    x_chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p), random_state =rng)
+    x_chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p)).rvs( random_state =rng)
     x_chain[0,p-1] = uniform.rvs(loc =1, scale =30, random_state =rng)#make sure population variance is positive
-    y_chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p), random_state =rng)
+    y_chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p)).rvs( random_state =rng)
     y_chain[0,p-1] = uniform.rvs(loc =1, scale =30, random_state =rng)#make sure population variance is positive
 
+    #handy to have
+    def get_total_precision_and_precision_weighted_average(tau:float):
 
-    def log_alpha(current, new):
-        pass
+        total_precision = np.sum( 1/(tau**2 +DATA["sigma.j"]**2)  )
 
-    #abstraction
-    def proposal_dist_logpdf(index, current_state):
+        average = np.sum(DATA["yBar.j"]/(tau**2 +DATA["sigma.j"]**2 ) )
+        precision_weighted_average = average/total_precision
+
+        return total_precision, precision_weighted_average
+
+    def log_unnormalised_target(state):
         mu, tau = current_state[8], current_state[9]
-        if index <=7:#group effects
-            x_bar = DATA[index,"yBar.j"]
-            sigma = DATA[index, "sigma.j"]
+
+        #tau part 
+        #taken from 8schools project
+        if tau <= 0:
+            tau_part = -np.inf #log of zero
+        
+        total_prec, mu_hat = get_total_precision_and_precision_weighted_average(tau)
+
+        log_total_prec = np.log(total_prec)
+
+        big_sum = np.log(DATA["sigma.j"]**2 + tau**2) + (DATA["yBar.j"] - mu_hat)**2/(DATA["sigma.j"]**2 + tau**2)
+        big_sum = np.sum(big_sum)
+
+        tau_part =  -.5*( log_total_prec + big_sum )
+
+        # group parts
+        #may as well use a func since they are normal given hyperparams
+        groups_part = 0
+        for j in range(0,8):
+            x_bar = DATA["yBar.j"][j]
+            sigma = DATA["sigma.j"][j]
             v_j = 1/( (1/sigma)+(1/tau) )
             theta_j = ( (x_bar/sigma)+(mu/tau) )*v_j
 
-            return norm(loc = theta_j, scale = v_j**.5).rvs
-        elif index == 8:#population mean
-                #taken from 8schools project 
-                total_precision = np.sum( 1/(tau**2 +DATA["sigma.j"]**2)  )
-                average = np.sum(DATA["yBar.j"]/(tau**2 +DATA["sigma.j"]**2 ) )
-                precision_weighted_average = average/total_precision
+            groups_part +=  norm(loc = theta_j, scale = v_j**.5).logpdf(state[j])
 
-                return norm(loc = precision_weighted_average, scale = total_precision**-.5).rvs
-        elif index == 9:#population variance
-            pass
-    def proposal_dist_sampler(index, current_state):
+        #mu part
+        #the exp bit of a normal
+        mu_part = -.5*total_prec*((mu-mu_hat)**2)
+
+
+        return mu_part+tau_part+groups_part
+
+    def log_alpha(current, new):
+        r = log_unnormalised_target(new)-log_unnormalised_target(current)
+        return min(0, r)
+
+    #abstraction
+    #get the proposal distribution for each component
+    #then in the two other functions either get a sampler or log density
+    def proposal_general(index, current_state):
+    
+        mu, tau = current_state[8], current_state[9]
         if index <=7:#group effects
-            pass
+            x_bar = DATA["yBar.j"][index]
+            sigma = DATA["sigma.j"][index]
+            v_j = 1/( (1/sigma)+(1/tau) )
+            theta_j = ( (x_bar/sigma)+(mu/tau) )*v_j
+
+            return norm(loc = theta_j, scale = v_j**.5)
+        
         elif index == 8:#population mean
-            pass
+            #taken from 8schools project 
+            total_precision, precision_weighted_average = get_total_precision_and_precision_weighted_average(tau)
+            return norm(loc = precision_weighted_average, scale = total_precision**-.5)
+        
         elif index == 9:#population variance
-            pass
+            return norm(loc = tau, scale =50)
+    
+    def proposal_dist_logpdf(index, current_state):
+        return proposal_general(index, current_state).logpdf
+    def proposal_dist_sampler(index, current_state):
+        return proposal_general(index, current_state).rvs
 
     #run X chain for lag steps
     for t in range(1,lag+1):
@@ -464,7 +509,7 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
 
         #update a randomly selected component
         index = rng.choice(p,1)
-        proposed_state[index] = proposal_dist_sampler(index, current_state)
+        proposed_state[index] = proposal_dist_sampler(index, current_state)(random_state=rng)
 
         #accept/reject
         log_u = log_unifs[t]
@@ -476,7 +521,7 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
     #couple the chains
     for t in range(lag+1, max_t_iterations):
 
-        current_x, current_y = x_chain[t], y_chain[t]
+        current_x, current_y = x_chain[t], y_chain[t-lag]
         proposed_x, proposed_y = current_x, current_y
 
         #update a randomly selected component
@@ -499,9 +544,9 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
         else:
             x_chain[t] = current_x
         if log_u <= log_alpha(current_y, proposed_y):
-            y_chain[t] = proposed_y
+            y_chain[t-lag] = proposed_y
         else:
-            y_chain[t] = current_y
+            y_chain[t-lag] = current_y
 
         #check for meeting
         if not meeting_time and (y_chain[t-lag,] == x_chain[t,]).all() : 

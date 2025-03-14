@@ -1,4 +1,5 @@
 from functions import *
+from generate_tau_samples import at1_8schools_coupled_mcmc
 import logging 
 logger = logging.getLogger(__name__)
 logging.basicConfig( level=logging.INFO)
@@ -117,10 +118,16 @@ looking at lagged coupled chain that has been ran for 10x burnin of 857
 target is highly correlated mvn3
 """
 
-tau_data = read_df_file("high_autocorrelated_mvn-P3-Seed42-tau-data 2025-03-05 Wed 13-01.csv")
+# tau_data = read_df_file("high_autocorrelated_mvn-P3-Seed42-tau-data 2025-03-05 Wed 13-01.csv")
 
-title = r"high autocor $N_3(\mu,\Sigma)$"
-plot_tau_stuff(tau_data,title)
+# title = r"high autocor $N_3(\mu,\Sigma)$"
+# plot_tau_stuff(tau_data,title)
 
-tv_ests = read_df_file("high_autocorrelated_mvn-P3-Seed42-tv-ests 2025-03-05 Wed 13-01.csv")
-plot_tv_upper_bound(tv_ests, title)
+# tv_ests = read_df_file("high_autocorrelated_mvn-P3-Seed42-tv-ests 2025-03-05 Wed 13-01.csv")
+# plot_tv_upper_bound(tv_ests, title)
+
+#crossing fingers
+
+x, y = at1_8schools_coupled_mcmc(5, 55, 100 , True)
+print(x)
+print(y)
