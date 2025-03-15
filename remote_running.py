@@ -7,6 +7,21 @@ log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
 logging.basicConfig(filename = log_path , level=logging.INFO)
 remote_logger = logging.getLogger(__name__)
 
+def get_tv_est_8schools():
+
+    tau_data = sample_tau_L_for_many_lags(
+        at1_8schools_coupled_mcmc
+        ,[500, 1_000, 2_000, 3_000]
+        , num_tau_samples = 1_000
+    )
+    print_basic_df_summary(tau_data)
+
+    f_name = save_df_with_timestamp(tau_data, f"{at1_8schools_coupled_mcmc.__name__}-tau-data")
+    remote_logger.info(f"tau samples saved to {f_name}")
+
+    f_name = estimate_TV_from_file(f_name, 600, f"{at1_8schools_coupled_mcmc.__name__}-tv-ests")
+    remote_logger.info(f"Tv estimates saved to {f_name}")
+
 def get_big_mcmc_sample():
     
     mvn  = high_autocorrelated_mvn(3, 42)
@@ -59,7 +74,9 @@ if __name__ == "__main__":
 
     remote_logger.info("\n") # add a line to seperate this execution from any others
 
-    get_big_mcmc_sample()
+
+    get_tv_est_8schools()
+    # get_big_mcmc_sample()
     # # do not call sample_tau_L_for_many_lags outside of here 
     # tau_data = sample_tau_L_for_many_lags(
     #     Some_random_Pd_mcmc(p = 3,seed = 5),
