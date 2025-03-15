@@ -514,23 +514,8 @@ def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, ret
         logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
     
     if return_chain:
-        if meeting_time:
-            logger.info(f"{meeting_time=}")
         #get rid of the initialised bits of Y never populated
         return x_chain, y_chain[0:(max_t_iterations-lag),]
     else:
         return meeting_time
     
-
-if __name__ == "__main__":
-    N= 10_000
-    lag = N//10
-    burn_in =N//5
-    x, y = at1_8schools_coupled_mcmc(lag, 55, max_t_iterations =N ,  return_chain =True)
-    from functions import trace_plot2
-    for comp in range(x.shape[1]):
-        trace_plot2(x[burn_in:,comp], y[burn_in:,comp], lag)
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    sns.histplot(x[:,9], bins = 30)
-    plt.show()
