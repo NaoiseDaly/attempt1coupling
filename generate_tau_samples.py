@@ -367,7 +367,7 @@ class high_autocorrelated_mvn(Some_random_Pd_mcmc):
         scale = np.median(self._mu) #why not, makes the variance large
         self._sigma = make_cov_equivar(p, .9, 1/scale)
 
-def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, return_chain =False):
+def at1_8schools_coupled_mcmc(lag:int, max_t_iterations=10**4, random_state = None, return_chain =False):
     """
     Single chain target joint posterior in 8 schools problem
     """
