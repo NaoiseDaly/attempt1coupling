@@ -367,45 +367,6 @@ class high_autocorrelated_mvn(Some_random_Pd_mcmc):
         scale = np.median(self._mu) #why not, makes the variance large
         self._sigma = make_cov_equivar(p, .9, 1/scale)
 
-def at1_8schools_mcmc(random_state, max_t_iterations=10**4):
-    """
-    Single chain target joint posterior in 8 schools problem
-    """
-    #set up
-    p = 8+2 #group means plus mu plus tau
-    rng = np.random.default_rng(random_state)
-    log_unifs = np.log(uniform.rvs(size = max_t_iterations+1, random_state = rng)) 
-
-    chain = np.zeros(shape=(max_t_iterations,p))
-    #could do this based on estimates from data
-    chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p), random_state =rng)
-    chain[0,p-1] = uniform.rvs(loc =1, scale =30, random_state =rng)#make sure population variance is positive
-
-    def log_alpha(current, new):
-        pass
-
-    def proposal_dist_sampler(index, current):
-        pass
-
-    for t in range(1,max_t_iterations):
-
-        current_state = chain[t-1,]
-        proposed_state = current_state
-
-        #update a randomly selected component
-        chosen_index = rng.choice(p,1)
-        proposed_state[chosen_index] = proposal_dist_sampler(chosen_index, current_state)
-
-        #accept/reject
-        log_u = log_unifs[t]
-        if log_alpha(current_state, proposed_state) < log_u:
-            chain[t] = proposed_state
-        else:
-            chain[t] = current_state
-    
-    return chain
-
-
 def at1_8schools_coupled_mcmc(lag:int, random_state, max_t_iterations=10**4, return_chain =False):
     """
     Single chain target joint posterior in 8 schools problem
