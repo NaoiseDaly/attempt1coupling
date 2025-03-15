@@ -17,8 +17,11 @@ if __name__ == "__main__":
     remote_logger.info("\nCreating Unit Test data") # add a line to seperate this execution from any others
     
     #original mcmc algorithms
-    for algo in [modified_coupled_MCMC2, mvn_2d_mcmc,
-                 Some_random_Pd_mcmc(1, 9),Some_random_Pd_mcmc(2,10), Some_random_Pd_mcmc(3,11) ]:
+    for algo in [
+        at1_8schools_coupled_mcmc
+        # modified_coupled_MCMC2, mvn_2d_mcmc,
+                #  Some_random_Pd_mcmc(1, 9),Some_random_Pd_mcmc(2,10), Some_random_Pd_mcmc(3,11) 
+                ]:
         remote_logger.info(f"running {algo.__name__}")
         tau_data = sample_tau_L_for_many_lags(
             algo,
@@ -35,16 +38,16 @@ if __name__ == "__main__":
         remote_logger.info(f"saved to {f_path}")
     
     #covariance matrices
-    p = 10; num_matrices = 10
-    for func in [make_cov_haar, make_cov_ar1]: 
+    # p = 10; num_matrices = 10
+    # for func in [make_cov_haar, make_cov_ar1]: 
 
-        cov_dat = np.zeros((num_matrices,p,p))
-        for i, seed in enumerate(range(  33**3, num_matrices+ 33**3)):
-            cov_dat[i, ] = func(seed, p, i+1)
+    #     cov_dat = np.zeros((num_matrices,p,p))
+    #     for i, seed in enumerate(range(  33**3, num_matrices+ 33**3)):
+    #         cov_dat[i, ] = func(seed, p, i+1)
 
-        f_name = f"reproduce__{func.__name__}.npy"
-        f_path = make_log_path_str( f_name)
-        np.save(f_path, cov_dat)
-        remote_logger.info(f"saved to {f_path}")
+    #     f_name = f"reproduce__{func.__name__}.npy"
+    #     f_path = make_log_path_str( f_name)
+    #     np.save(f_path, cov_dat)
+    #     remote_logger.info(f"saved to {f_path}")
     
     remote_logger.info("Done \n")
