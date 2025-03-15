@@ -11,7 +11,7 @@ def get_tv_est_8schools():
 
     tau_data = sample_tau_L_for_many_lags(
         at1_8schools_coupled_mcmc
-        ,[500, 1_000, 2_000, 3_000]
+        ,lags = [1_000, 2_000, 3_000]
         , num_tau_samples = 1_000
     )
     print_basic_df_summary(tau_data)
@@ -21,6 +21,22 @@ def get_tv_est_8schools():
 
     f_name = estimate_TV_from_file(f_name, 600, f"{at1_8schools_coupled_mcmc.__name__}-tv-ests")
     remote_logger.info(f"Tv estimates saved to {f_name}")
+
+# def run_long_chain_8schools():
+
+#     long, _ = at1_8schools_coupled_mcmc(
+#         lag = dududuh, 
+#         random_state = 505
+#         , return_chain = True
+#     )
+
+#     short = long[:dududuh,].copy()
+    
+#     stamp = make_timestamp()
+#     long_path = os.path.join("logs_and_data", f"8schools_long_chain_{stamp}.csv" )
+#     short_path = os.path.join("logs_and_data", f"8schools_short_chain_{stamp}.csv" )
+#     np.savetxt(fname = long_path,X =  long, delimiter = ",")
+#     np.savetxt(fname = short_path,X =  short, delimiter = ",")
 
 def get_big_mcmc_sample():
     

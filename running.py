@@ -126,8 +126,20 @@ target is highly correlated mvn3
 # tv_ests = read_df_file("high_autocorrelated_mvn-P3-Seed42-tv-ests 2025-03-05 Wed 13-01.csv")
 # plot_tv_upper_bound(tv_ests, title)
 
-#crossing fingers
+"""
+final section 
+8 schools example of MCMC
+All the joint posterior on all parameters are targeted by one chain -  for demonstration purposes
+One param is updated each iteration, chosen uniformly at random.
+group params and pop params are updated using a gibbs sampling conditional on the current state
+pop var is updated using a MH random walk.
+"""
 
-x, y = at1_8schools_coupled_mcmc(5, 55, 100 , True)
-print(x)
-print(y)
+
+tau_f = read_demo_df_file("at1_8schools_coupled_mcmc-tau-data 2025-03-15 Sat 21-54.csv"
+                          ,"8schools example")
+plot_tau_stuff(tau_f, "spread of meeting times ")
+
+tv_ests = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv"
+                       ,"8schools example" )
+plot_tv_upper_bound(tv_ests, "target is 8 schools example")

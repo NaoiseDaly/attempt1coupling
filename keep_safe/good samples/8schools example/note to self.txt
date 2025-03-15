@@ -1,0 +1,2 @@
+for at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv
+num tau replicas was 1K
