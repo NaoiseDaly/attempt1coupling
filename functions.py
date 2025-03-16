@@ -487,14 +487,17 @@ def read_good_sample_np_csv(f_name, folder):
                           ,f_name)
     return np.genfromtxt(f_path, delimiter = ",")
 
-def trace_plot_10_comps(chain):
+def trace_plot_10_comps(chain, titles:list=None):
     fig, axes = plt.subplots(5,2)
     axes = axes.flatten() 
     for i in range(chain.shape[1]):
         ax = axes[i]
         dat = chain[:,i]
         ax.plot(dat,"g-")
-        ax.set_title(f"comp {i}")
+        if titles:
+            ax.set_title(titles[i])
+        else:
+            ax.set_title(i)
     plt.show()
 
 def boxplot_two_chains_side_by_side(a,b, a_name=None, b_name = None, var_names= None):
