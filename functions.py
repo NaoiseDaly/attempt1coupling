@@ -481,3 +481,41 @@ def plot_tv_upper_bound(tv_est, title_rv_name=""):
     ax1.set_ylabel("TV upper bound")
     ax1.set_xlabel("time t")
     plt.show()
+
+def read_good_sample_np_csv(f_name, folder):
+    f_path = os.path.join("keep_safe","good samples",folder
+                          ,f_name)
+    return np.genfromtxt(f_path, delimiter = ",")
+
+def trace_plot_10_comps(chain):
+    fig, axes = plt.subplots(5,2)
+    axes = axes.flatten() 
+    for i in range(chain.shape[1]):
+        ax = axes[i]
+        dat = chain[:,i]
+        ax.plot(dat,"g-")
+        ax.set_title(f"comp {i}")
+    plt.show()
+
+def boxplot_two_chains_side_by_side(a,b, a_name=None, b_name = None, var_names= None):
+    """
+
+    
+    taken from https://stackoverflow.com/questions/43612687/python-matplotlib-box-plot-two-data-sets-side-by-side
+    """
+    fig, ax = plt.subplots()
+    
+    def draw_plot(data, offset,edge_color, fill_color, name):
+        pos = np.arange(data.shape[1])+offset
+        bp = ax.boxplot(data, positions= pos, widths=0.3, patch_artist=True, manage_ticks=False, sym ="", label = name)
+        for element in ['boxes', 'whiskers', 'medians', 'caps']:
+            plt.setp(bp[element], color=edge_color)
+        for patch in bp['boxes']:
+            patch.set(facecolor=fill_color)
+
+    draw_plot(a, -0.2, "darkviolet", "violet", a_name)
+    draw_plot(b, +0.2,"darkorange", "bisque", b_name)
+    ax.legend()
+    if var_names:
+        plt.xticks(range(0,len(var_names)), var_names)
+    plt.show()
