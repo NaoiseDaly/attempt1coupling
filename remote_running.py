@@ -1,4 +1,4 @@
-from functions import print_basic_df_summary, save_df_with_timestamp, estimate_TV_from_file, make_timestamp
+from functions import print_basic_df_summary, save_df_with_timestamp, estimate_TV_from_file, make_timestamp,read_demo_df_file
 from generate_tau_samples import *
 from unit_tests import run_all_checks
 import logging, os.path
@@ -22,21 +22,40 @@ def get_tv_est_8schools():
     f_name = estimate_TV_from_file(f_name, 600, f"{at1_8schools_coupled_mcmc.__name__}-tv-ests")
     remote_logger.info(f"Tv estimates saved to {f_name}")
 
-# def run_long_chain_8schools():
+def run_2_chain_8schools():
 
-#     long, _ = at1_8schools_coupled_mcmc(
-#         lag = dududuh, 
-#         random_state = 505
-#         , return_chain = True
-#     )
+    tv_bound = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv"
+                       ,"8schools example" )["3000"]
 
-#     short = long[:dududuh,].copy()
-    
-#     stamp = make_timestamp()
-#     long_path = os.path.join("logs_and_data", f"8schools_long_chain_{stamp}.csv" )
-#     short_path = os.path.join("logs_and_data", f"8schools_short_chain_{stamp}.csv" )
-#     np.savetxt(fname = long_path,X =  long, delimiter = ",")
-#     np.savetxt(fname = short_path,X =  short, delimiter = ",")
+    #the TV is non increasing so this is safe
+    t_short = tv_bound[tv_bound <=.25].first_valid_index()
+    t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
+
+    remote_logger.info(f"getting two chains of lengths {t_short}, {t_long}")
+    #because of the implementations, I know that evene with the same seed
+    #  because the sizes are different this gives distinct chains
+    #(the uniforms are precomputed at the start so the RNGs would go out of sync)
+    long, _ = at1_8schools_coupled_mcmc(
+        lag = 1, 
+        random_state = 505
+        , return_chain = True
+        ,max_t_iterations = t_long*10
+    )
+    short, _ = at1_8schools_coupled_mcmc(
+        lag = 1, 
+        random_state = 505
+        , return_chain = True
+        ,max_t_iterations = t_short*10
+    )
+    remote_logger.info("writing chains to file")
+
+    stamp = make_timestamp()
+    long_path = os.path.join("logs_and_data", f"8schools_long_chain_{stamp}.csv" )
+    short_path = os.path.join("logs_and_data", f"8schools_short_chain_{stamp}.csv" )
+    np.savetxt(fname = long_path,X =  long, delimiter = ",")
+    np.savetxt(fname = short_path,X =  short, delimiter = ",")
+
+    remote_logger.info("done now")
 
 def get_big_mcmc_sample():
     
@@ -91,7 +110,9 @@ if __name__ == "__main__":
     remote_logger.info("\n") # add a line to seperate this execution from any others
 
 
-    get_tv_est_8schools()
+    # get_tv_est_8schools()
+    run_2_chain_8schools()
+
     # get_big_mcmc_sample()
     # # do not call sample_tau_L_for_many_lags outside of here 
     # tau_data = sample_tau_L_for_many_lags(
