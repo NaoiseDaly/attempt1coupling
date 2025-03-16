@@ -137,9 +137,15 @@ pop var is updated using a MH random walk.
 
 
 tau_f = read_demo_df_file("at1_8schools_coupled_mcmc-tau-data 2025-03-15 Sat 21-54.csv"
-                          ,"8schools example")
+                          ,"8schools example").drop(columns="500") #500 maybe too low
+
 plot_tau_stuff(tau_f, "spread of meeting times ")
 
 tv_ests = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv"
-                       ,"8schools example" )
+                       ,"8schools example" ).drop(columns="500") #500 maybe too low
+
+
+tv_bound = tv_ests["3000"]
+print(tv_bound[tv_bound <=.25].head(1))
+print(tv_bound[tv_bound <=(1-.99)].head(1))
 plot_tv_upper_bound(tv_ests, "target is 8 schools example")
