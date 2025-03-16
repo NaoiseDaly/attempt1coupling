@@ -1,2 +1,8 @@
 for at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv
 num tau replicas was 1K
+
+for 8schools_short_chain_2025-03-16 Sun 17-53.csv
+long/short lengths was based off .01 and .25 from for at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv
+
+for 8schools_short_chain_2025-03-16 Sun 18-09.csv
+same as above buth lengths times'd by 10
