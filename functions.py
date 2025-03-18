@@ -500,7 +500,7 @@ def trace_plot_10_comps(chain, titles:list=None):
             ax.set_title(i)
     plt.show()
 
-def boxplot_two_chains_side_by_side(a,b, a_name=None, b_name = None, var_names= None):
+def boxplot_two_chains_side_by_side(a,b, a_name=None, b_name = None, var_names= None, title = None):
     """
 
     
@@ -521,4 +521,7 @@ def boxplot_two_chains_side_by_side(a,b, a_name=None, b_name = None, var_names= 
     ax.legend()
     if var_names:
         plt.xticks(range(0,len(var_names)), var_names)
+    
+    if title:
+        ax.set_title(title)
     plt.show()
