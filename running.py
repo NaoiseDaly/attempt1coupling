@@ -148,7 +148,7 @@ tv_ests = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21
 tv_bound = tv_ests["3000"]
 print(tv_bound[tv_bound <=.25].head(1))
 print(tv_bound[tv_bound <=(1-.99)].head(1))
-plot_tv_upper_bound(tv_ests, "target is 8 schools example")
+# plot_tv_upper_bound(tv_ests, "target is 8 schools example")
 
 
 comp_names = [rf"$\theta_{j}$" for j in range(1,8+1) ]
@@ -162,7 +162,9 @@ for chain in [short, long]:
     for col in range(chain.shape[1]):
         quants = np.percentile(chain[:,col], q= [25, 50, 75]).astype(np.int32)
         print(quants)
-    trace_plot_10_comps(chain, comp_names)
+    # trace_plot_10_comps(chain, comp_names)
 
-
-boxplot_two_chains_side_by_side(long, short, "long", "short", comp_names)
+boxplot_two_chains_side_by_side(long[:,:8], short[:,:8], "long", "short", comp_names[:8]
+                                ,title = "Sample Distribution of group parameters")
+boxplot_two_chains_side_by_side(long[:,8:], short[:,8:], "long", "short", comp_names[8:]
+                                ,title = "Sample Distribution of population parameters")
