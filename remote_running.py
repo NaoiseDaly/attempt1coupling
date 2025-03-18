@@ -30,6 +30,8 @@ def run_2_chain_8schools():
     #the TV is non increasing so this is safe
     t_short = tv_bound[tv_bound <=.25].first_valid_index()
     t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
+    chain_size = 2_000
+    chain_factor = 10
 
     remote_logger.info(f"getting two chains of lengths {t_short}, {t_long}")
     #because of the implementations, I know that evene with the same seed
@@ -39,21 +41,21 @@ def run_2_chain_8schools():
         lag = 1, 
         random_state = 505
         , return_chain = True
-        ,max_t_iterations = t_long*10
+        ,max_t_iterations = t_long*chain_factor
     )
     short, _ = at1_8schools_coupled_mcmc(
         lag = 1, 
         random_state = 505
         , return_chain = True
-        ,max_t_iterations = t_short*10
+        ,max_t_iterations = t_short*chain_factor
     )
     remote_logger.info("writing chains to file")
 
     stamp = make_timestamp()
     long_path = os.path.join("logs_and_data", f"8schools_long_chain_{stamp}.csv" )
     short_path = os.path.join("logs_and_data", f"8schools_short_chain_{stamp}.csv" )
-    np.savetxt(fname = long_path,X =  long, delimiter = ",")
-    np.savetxt(fname = short_path,X =  short, delimiter = ",")
+    np.savetxt(fname = long_path,X =  long[t_long:], delimiter = ",")
+    np.savetxt(fname = short_path,X =  short[t_short:], delimiter = ",")
 
     remote_logger.info("done now")
 
