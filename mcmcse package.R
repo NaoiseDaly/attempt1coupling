@@ -39,7 +39,7 @@ require("mcmcse")
 
 rm(list = ls())
 dev.off()
-old.par <- par(no.readonly = T);back <- function(){ par(old.par)}
+old.par <- par(no.readonly = T);back <- function(){ par(old.par);par(pch=20)}
 require("mcmcse")
 setwd(
     r"(C:\Users\Naoise Daly\OneDrive - University College Cork\FYP\attempt1coupling\keep_safe\good samples\8schools example)"
@@ -56,55 +56,62 @@ dim(long);dim(short)
 # #remove 10% burn in 
 # short = short[dim(short)[1]%/%10:dim(short)[1], ]
 # long = long[dim(long)[1]%/%10:dim(long)[1], ]
+every.tenth.ind = seq(1,nrow(long), by =10)
+long_thinned = long[every.tenth.ind,]
+short_thinned = short[seq(1,nrow(short), by =10),]
 
-
-lst = list(long = long, short= short)
-for (i in lst){
+par(mar= c(1,4.1,1,1))
+lst = list(long = long, long_thinned = long_thinned
+           , short= short, short_thinned)
+col = 3
+for (chain in lst){
   par(mfrow = c(min(ncol(chain),4),1))
   for (c in colnames(chain)){
     plot(
-      chain[,c], col = "blue", type = "l", lwd = 1.5
+      chain[,c], col = col, type = "l", lwd = 1.5
       ,xlab = "time", ylab = paste("component ",c)
     )
-  }
-  }
-chain <- long
-par(mfrow = c(min(ncol(chain),4),1))
-for (c in colnames(chain)){
-  plot(
-        chain[,c], col = "blue", type = "l", lwd = 1.5
-       ,xlab = "time", ylab = paste("component ",c)
-           )
-}
 
-nrow(long);multiESS(long);min(ess(long))
-nrow(short);multiESS(short);min(ess(short))
-
-steps = nrow(long)- ncol(long)
-mv.ess <- numeric(steps)
-causedWarning = numeric(steps)
-for (t in 1:steps) {
-  output <- tryCatch( multiESS(long[t:nrow(long),])
-                      , warning = function(w) c(multiESS(long[t:nrow(long),]), 1) )
-  if (length(output) >1){
-    causedWarning[t] = 1
-    mv.ess[t] = output[1]
+  } ;   col = col +1
   }
-  else{
-    mv.ess[t] = output
-  }
-  
-}
-back()
-plot(mv.ess, col = c("black","red")[as.factor(causedWarning)], pch = 20)
-plot(which(causedWarning == 0), mv.ess[causedWarning == 0]
-     ,main = "multi ESS on windows starting from t"
-     ,xlab = "t", ylab = "MV ESS"
-     ,pch = 20)
-#notice for Sun 20-14 datset 
-multiESS(long[45:nrow(long),])# fails
-
-
+# chain <- long
+# par(mfrow = c(min(ncol(chain),4),1))
+# for (c in colnames(chain)){
+#   plot(
+#         chain[,c], col = "blue", type = "l", lwd = 1.5
+#        ,xlab = "time", ylab = paste("component ",c)
+#            )
+# }
+# 
+# nrow(long);multiESS(long);min(ess(long))
+# nrow(short);multiESS(short);min(ess(short))
+# 
+# steps = nrow(long)- ncol(long)
+# mv.ess <- numeric(steps)
+# causedWarning = numeric(steps)
+# for (t in 1:steps) {
+#   output <- tryCatch( multiESS(long[t:nrow(long),])
+#                       , warning = function(w) c(multiESS(long[t:nrow(long),]), 1) )
+#   if (length(output) >1){
+#     causedWarning[t] = 1
+#     mv.ess[t] = output[1]
+#   }
+#   else{
+#     mv.ess[t] = output
+#   }
+#   
+# }
+# back()
+# plot(mv.ess, col = c("black","red")[as.factor(causedWarning)], pch = 20)
+# plot(which(causedWarning == 0), mv.ess[causedWarning == 0]
+#      ,main = "multi ESS on windows starting from t"
+#      ,xlab = "t", ylab = "MV ESS"
+#      ,pch = 20)
+# #notice for Sun 20-14 datset 
+# multiESS(long[45:nrow(long),])# fails
+# 
+# 
+# 
 
 uni_ESS_long = matrix(rep(0, steps*2), ncol = 2)
 colnames(uni_ESS_long) <- c("uni_ESS", "warning")
@@ -119,7 +126,7 @@ for (t in 1:steps) {
   else{
     uni_ESS_long[t, 1] = output
   }
-  
+
 }
 cols = c("black","red")[as.factor(uni_ESS_long[,"warning"])]
 plot(uni_ESS_long[,"uni_ESS"], type = "l")
