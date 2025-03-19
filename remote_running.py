@@ -11,8 +11,8 @@ def get_tv_est_8schools():
 
     tau_data = sample_tau_L_for_many_lags(
         at1_8schools_coupled_mcmc
-        ,lags = [1_000, 2_000, 3_000]
-        , num_tau_samples = 1_000
+        ,lags = [2_000, 3_000, 5_000]
+        , num_tau_samples = 2_000
     )
     print_basic_df_summary(tau_data)
 
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     remote_logger.info("\n") # add a line to seperate this execution from any others
 
 
-    # get_tv_est_8schools()
-    run_2_chain_8schools()
+    get_tv_est_8schools()
+    # run_2_chain_8schools()
 
     # get_big_mcmc_sample()
     # # do not call sample_tau_L_for_many_lags outside of here 
