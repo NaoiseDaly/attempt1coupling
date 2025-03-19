@@ -139,7 +139,7 @@ pop var is updated using a MH random walk.
 tau_f = read_demo_df_file("at1_8schools_coupled_mcmc-tau-data 2025-03-15 Sat 21-54.csv"
                           ,"8schools example").drop(columns="500") #500 maybe too low
 
-# plot_tau_stuff(tau_f, "spread of meeting times ")
+plot_tau_stuff(tau_f, "spread of meeting times ")
 
 tv_ests = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv"
                        ,"8schools example" ).drop(columns="500") #500 maybe too low
@@ -148,7 +148,7 @@ tv_ests = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21
 tv_bound = tv_ests["3000"]
 print(tv_bound[tv_bound <=.25].head(1))
 print(tv_bound[tv_bound <=(1-.99)].head(1))
-# plot_tv_upper_bound(tv_ests, "target is 8 schools example")
+plot_tv_upper_bound(tv_ests, "target is 8 schools example")
 
 
 comp_names = [rf"$\theta_{j}$" for j in range(1,8+1) ]
@@ -159,10 +159,9 @@ short = read_good_sample_np_csv("8schools_short_chain_2025-03-16 Sun 20-14.csv",
 
 for chain in [short, long]:
     print(chain.shape)
-    for col in range(chain.shape[1]):
-        quants = np.percentile(chain[:,col], q= [25, 50, 75]).astype(np.int32)
-        print(quants)
-    # trace_plot_10_comps(chain, comp_names)
+    quants = np.percentile(chain, [25, 50, 75], axis =0)
+    print(np.round(quants))
+    trace_plot_10_comps(chain, comp_names)
 
 boxplot_two_chains_side_by_side(long[:,:8], short[:,:8], "long", "short", comp_names[:8]
                                 ,title = "Sample Distribution of group parameters")
