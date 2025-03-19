@@ -371,7 +371,6 @@ def at1_8schools_coupled_mcmc(lag:int, max_t_iterations=10**4, random_state = No
     """
     Single chain target joint posterior in 8 schools problem
     """
-    ind_counts = []
     #set up
     p = 8+2 #group means plus mu plus tau
     meeting_time = None
@@ -431,6 +430,7 @@ def at1_8schools_coupled_mcmc(lag:int, max_t_iterations=10**4, random_state = No
             var, theta_j = get_v_j_and_theta_j_hat_given_hypparams(mu, tau, index)
             #the exp bit of a normal
             return -.5*(1/var)*((state[index]-theta_j)**2)
+
 
 
     def log_alpha(current, new, index):
