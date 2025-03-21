@@ -3,9 +3,8 @@ from functions import *
 import matplotlib.pyplot as plt
 from matplotlib import animation
 
-def get_univariate_coupled_chain():
+def get_univariate_coupled_chain(seed):
 
-    seed = 2002
     mcmc_obj = Some_random_Pd_mcmc(1,seed)
     lag = 100
     print(mcmc_obj)
@@ -80,18 +79,10 @@ def animate_univariate_chains_meeting(x_chain, y_chain_shifted, title=""):
 
     fig, ax = plt.subplots()
 
-    # ax.set_ylabel("State space" )
-    # ax.set_xlabel("time")
-    # if title:
-    #     ax.set_title(title)
-    # else:
-    #     ax.set_title(
-    #         f"coupled chains with a lag of {lag}"
-    #     )
-
     #need to save the lines added
-    scat1 = ax.plot(x_chain[0] ,color = "red",label = "Unlagged chain")[0]
-    scat2 = ax.plot(y_chain_shifted[0], color ="blue",label = "Lagged chain")[0]
+    scat1 = ax.plot(x_chain[0] ,color = "red", label = "Unlagged chain")[0]
+    scat2 = ax.plot(y_chain_shifted[0], color ="blue",linestyle='dashed'
+                    ,label = "Lagged chain")[0]
 
     leg = ax.legend()
 
@@ -127,6 +118,9 @@ def animate_univariate_chains_meeting(x_chain, y_chain_shifted, title=""):
         if new_x_chain[-1] == new_y_chain[-1]:
             scat1.set_color("purple")
             scat2.set_color("purple")
+            #change the legend as well
+            for line in leg.get_lines():
+                line.set_color("purple")
 
         #so a np.nan seems to be nilpotent which makes a min/max call useless
         #an empty array also seems to break a min/max call
@@ -186,24 +180,28 @@ def plt_example():
 
 
 if __name__ == "__main__":
-    x, y, lag = get_univariate_coupled_chain()
-    print(x.shape,y.shape)
-    title = fr"Coupled chains with lag {lag} targeting $N(\mu=77, \sigma^2=6)$"
+    # with a seed of 0 the target is mean 27 sd 2
+    #and the initilisation is close
+    x, y, lag = get_univariate_coupled_chain(0)
+    plt.plot(x)
+    plt.title(r"Markov chain a target dist of $N(\mu=27, \sigma^2=4)$")
+    plt.show()
+
+    title = fr"Coupled chains with lag {lag} targeting $N(\mu=27, \sigma^2=4)$"
     animate_univariate_chains_meeting(x,y, title)
     animate_L2_dist_of_chains(x,y, lag)
 
-    y = np.genfromtxt(
-        os.path.join("keep_safe","3D-MVN-sample","lagged-chain.csv")
-        ,delimiter = ","
-    )
-    x = np.genfromtxt(
-        os.path.join("keep_safe","3D-MVN-sample","nonlagged-chain.csv")
-        ,delimiter = ","
-    )
+    # y = np.genfromtxt(
+    #     os.path.join("keep_safe","3D-MVN-sample","lagged-chain.csv")
+    #     ,delimiter = ","
+    # )
+    # x = np.genfromtxt(
+    #     os.path.join("keep_safe","3D-MVN-sample","nonlagged-chain.csv")
+    #     ,delimiter = ","
+    # )
 
-    print(x.shape,y.shape)
-    lag = 500
-    y = np.pad(y,((lag,0),(0,0)), mode = "constant", constant_values = np.nan)
-    print(x.shape,y.shape)
-    # animate_L2_dist_of_chains(x,y,lag)
+    # lag = 500
+    # y = np.pad(y,((lag,0),(0,0)), mode = "constant", constant_values = np.nan)
+    # print(x.shape,y.shape)
+    # # animate_L2_dist_of_chains(x,y,lag)
     
