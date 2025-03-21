@@ -476,7 +476,7 @@ def plot_tv_upper_bound(tv_est, title_rv_name=""):
     ax1.axhline(0,color = "black", ls ="--")
     ax1.axhline(1,color = "black", ls ="--")
     ax1.axhline(0.25,color = "grey", ls ="--")
-    ax1.set_title(f"TV upper bound for {title_rv_name}")
+    ax1.set_title(f"{title_rv_name}")
     ax1.legend(tv_est.columns, title = "Lag")
     ax1.set_ylabel("TV upper bound")
     ax1.set_xlabel("time t")
