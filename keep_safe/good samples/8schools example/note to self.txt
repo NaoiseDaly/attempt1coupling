@@ -6,3 +6,6 @@ long/short lengths was based off .01 and .25 from for at1_8schools_coupled_mcmc-
 
 for 8schools_short_chain_2025-03-16 Sun 18-09.csv
 same as above buth lengths times'd by 10
+
+for at1_8schools_coupled_mcmc-tv-ests 2025-03-19 Wed 11-02.csv
+2K num tua replicas 
