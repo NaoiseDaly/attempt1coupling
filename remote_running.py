@@ -1,11 +1,14 @@
-from functions import print_basic_df_summary, save_df_with_timestamp, estimate_TV_from_file, make_timestamp,read_demo_df_file
+from functions import *
 from generate_tau_samples import *
 from unit_tests import run_all_checks
 import logging, os.path
+import multiprocessing
+from time import perf_counter
 #make a logger for this file
 log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
 logging.basicConfig(filename = log_path , level=logging.INFO)
 remote_logger = logging.getLogger(__name__)
+
 
 def get_tv_est_8schools():
 
@@ -59,6 +62,67 @@ def run_2_chain_8schools():
 
     remote_logger.info("done now")
 
+def get_one_estimates_8schools(burn_in:int, n:int, seed:int):
+    #get a sample
+    chain, _ = at1_8schools_coupled_mcmc(
+        lag = 1, 
+        random_state = seed
+        , return_chain = True
+        ,max_t_iterations = burn_in+n
+    )
+    #get different types of estimates
+    est_1 = make_boxplot_quantiles(chain)
+
+    return est_1
+
+
+def get_avg_estimates_8schools(burn_in:int, replications:int,n:int, rng:np.random.default_rng):
+    """`WARNING` only run this function inside an `__name__ == "__main__"` block.  `WARNING`"""
+    this_func = get_avg_estimates_8schools.__name__
+    remote_logger.info(f"Starting {this_func}")
+    start = perf_counter()
+
+    boxplot_stuff = np.zeros(shape=(replications, 5,10)) #5 quantiles on 10 params
+
+    with multiprocessing.Pool() as pool:
+        args = ( (burn_in, n, seed_i)
+                for seed_i in rng.integers(10**7, size = replications)
+                )
+        output_list = pool.starmap(
+            get_one_estimates_8schools
+            ,args
+        )
+        for i, tup in enumerate(output_list):
+            boxplot_stuff[i,] = tup
+
+    #Monte Carlo
+    boxplot_stuff = boxplot_stuff.mean(axis=0)
+
+    end = perf_counter()
+    remote_logger.info(f"{burn_in=} {n=} {replications=} took {pretty_print_seconds(end-start)}")
+    remote_logger.info(f"Done {this_func}")
+    return boxplot_stuff
+
+def better_estimates_2chains_8schools():
+    tv_bound = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv"
+                       ,"8schools example" )["3000"]
+
+    #the TV is non increasing so this is safe
+    t_short = tv_bound[tv_bound <=.25].first_valid_index()
+    t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
+    chain_size = 2_000
+    reps = 8
+    rng = np.random.default_rng(2025)
+
+    good_inference = get_avg_estimates_8schools(
+        burn_in = t_long, replications = reps, n=chain_size,rng=rng
+    )
+
+    bad_inference = get_avg_estimates_8schools(
+        burn_in = t_short, replications = reps, n=chain_size,rng=rng
+    )   
+    return good_inference,bad_inference
+
 def get_big_mcmc_sample():
     
     mvn  = high_autocorrelated_mvn(3, 42)
@@ -111,8 +175,14 @@ if __name__ == "__main__":
 
     remote_logger.info("\n") # add a line to seperate this execution from any others
 
-
-    get_tv_est_8schools()
+    
+    good, bad = better_estimates_2chains_8schools()
+    bxp_stats_good = make_boxplot_stats_from_quantiles(good)
+    bxp_stats_bad = make_boxplot_stats_from_quantiles(bad)
+    d = good.shape[1]
+    boxplot_two_chains_side_by_side2(bxp_stats_good,bxp_stats_bad
+                                     ,"long", "short", dim =d)
+    # get_tv_est_8schools()
     # run_2_chain_8schools()
 
     # get_big_mcmc_sample()
