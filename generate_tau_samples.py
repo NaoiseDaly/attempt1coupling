@@ -8,7 +8,7 @@ import os, logging
 log_path = os.path.join("logs_and_data", "MCMCcouplingSimulation.log")#os safe
 logging.basicConfig(filename = log_path , level=logging.INFO)
 logger = logging.getLogger(__name__)
-DATA = read_csv(os.path.join("keep_safe","8SchoolsData.txt"))
+DATA = read_csv(os.path.join("keep_safe","8SchoolsData.txt")).copy(deep=True)
 
 def sample_tau_L_for_many_lags(mcmc_algo ,lags:iter, num_tau_samples:int
                                , max_t_iterations = 10**5, starting_random_seed:int= 10101010 ):
