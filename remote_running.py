@@ -34,7 +34,7 @@ def run_2_chain_8schools():
     chain_factor = 10
 
     remote_logger.info(f"getting two chains of lengths {t_short}, {t_long}")
-    #because of the implementations, I know that evene with the same seed
+    #because of the implementations, I know that even with the same seed
     #  because the sizes are different this gives distinct chains
     #(the uniforms are precomputed at the start so the RNGs would go out of sync)
     long, _ = at1_8schools_coupled_mcmc(
