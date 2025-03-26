@@ -482,6 +482,29 @@ def plot_tv_upper_bound(tv_est, title_rv_name=""):
     ax1.set_xlabel("time t")
     plt.show()
 
+def plot_tv_upper_bound_t_long_short(tv_est:DataFrame, title_rv_name="", t_long=.01, t_short=.25):
+    fig , ax1 = plt.subplots(1)
+    ax1.plot(tv_est)
+    max_lag = str(max(int(col) for col in tv_est.columns))
+    tv_bound = tv_est[max_lag]
+    t_long = tv_bound[tv_bound <=t_long].first_valid_index()
+    t_short = tv_bound[tv_bound <=t_short].first_valid_index()
+
+    ax1.vlines(x = [t_long, t_short],ymin = 0, ymax = tv_bound.iloc[[t_long, t_short]]
+               ,color = "black", ls ="dotted")
+    ax1.scatter(x = [t_long, t_short], y = tv_bound.iloc[[t_long, t_short]]
+                , color = "red", marker = "o"
+                , zorder = 15, s = 50)
+
+    ax1.axhline(0,color = "black", ls ="--")
+    ax1.axhline(1,color = "black", ls ="--")
+    # ax1.axhline(0.25,color = "grey", ls ="--")
+    ax1.set_title(f"{title_rv_name}")
+    ax1.legend(tv_est.columns, title = "Lag")
+    ax1.set_ylabel("TV upper bound")
+    ax1.set_xlabel("time t")
+    plt.show()
+
 def read_good_sample_np_csv(f_name, folder):
     f_path = os.path.join("keep_safe","good samples",folder
                           ,f_name)
