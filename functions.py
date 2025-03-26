@@ -548,3 +548,72 @@ def boxplot_two_chains_side_by_side(a,b, a_name=None, b_name = None, var_names= 
     if title:
         ax.set_title(title)
     plt.show()
+
+def boxplot_two_chains_side_by_side2(a_stats,b_stats, a_name=None, b_name = None
+                                     , dim = 1, var_names= None, title = None):
+    """
+    Uses matplotlibs `bxp` so takes the quantiles of the boxplots-not the data
+    Needs to know `d` the number of boxplots per chain
+    
+    Adapted from https://stackoverflow.com/questions/43612687/python-matplotlib-box-plot-two-data-sets-side-by-side
+    """
+    fig, ax = plt.subplots()
+    
+    def draw_plot(data, offset,edge_color, fill_color, name):
+        pos = np.arange(dim)+offset
+        bp = ax.bxp(data, positions= pos, widths=0.3, patch_artist=True
+                    , manage_ticks=False, label = name
+                    ,showfliers = False)
+        for element in ['boxes', 'whiskers', 'medians', 'caps']:
+            plt.setp(bp[element], color=edge_color)
+        for patch in bp['boxes']:
+            patch.set(facecolor=fill_color)
+
+    draw_plot(a_stats, -0.2, "darkviolet", "violet", a_name)
+    draw_plot(b_stats, +0.2,"darkorange", "bisque", b_name)
+    ax.legend()
+    if var_names:
+        plt.xticks(range(0,len(var_names)), var_names)
+    
+    if title:
+        ax.set_title(title)
+    plt.show()
+
+def make_boxplot_quantiles(sample:np.array):
+    """Takes data sample
+    Returns quantiles (Q1,Q2,Q3 and whiskers) to use in constructing a boxplot
+    """
+    quartiles = np.percentile(sample, [25, 50, 75], axis =0)
+    d = sample.shape[1]
+
+    iqr = quartiles[2,] - quartiles[0,]
+    #the minimum function needs an initials value if a where filter were to be applied aswell
+    low_whisker, high_whisker = np.zeros(d), np.zeros(d)
+    for i in range(d):
+        vals = sample[:,i]
+        above_lo_whisker_line  = vals[vals >= quartiles[0,i] - 1.5*iqr[i]]
+        low_whisker[i] = min(above_lo_whisker_line)
+        below_hi_whisker_line = vals[vals <= quartiles[2,i] + 1.5*iqr[i]]
+        high_whisker[i] = max(below_hi_whisker_line)
+
+    #probably cleaner/memory efficient ways of doing this
+    output = np.zeros(quartiles.shape + np.array([2,0]) )
+    output[0,], output[4,] = low_whisker, high_whisker
+    output[1:3+1,] = quartiles
+
+    return output
+
+def make_boxplot_stats_from_quantiles(stats:np.ndarray):
+    """
+    Wrapper to pass computed quantiles to matplotlibs bxp
+    """
+    return [
+        {"whislo":stats[0,i]
+             ,"q1":stats[1,i]
+             ,"med":stats[2,i]
+             ,"q3":stats[3,i]
+             ,"whishi":stats[4,i]
+            }
+        for i in range(stats.shape[1])
+        ]
+
