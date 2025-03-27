@@ -76,7 +76,8 @@ def get_one_estimates_8schools(burn_in:int, n:int, seed:int):
     return est_1
 
 
-def get_avg_estimates_8schools(burn_in:int, replications:int,n:int, rng:np.random.default_rng,label=""):
+def get_avg_estimates_8schools(burn_in:int, replications:int,n:int
+                               , rng:np.random.default_rng,label="", time_stamp = None):
     """`WARNING` only run this function inside an `__name__ == "__main__"` block.  `WARNING`"""
     this_func = get_avg_estimates_8schools.__name__
     remote_logger.info(f"Starting {this_func}")
@@ -98,8 +99,11 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int, rng:np.rando
     #Average the results
     boxplot_stuff_mean = boxplot_stuff.mean(axis=0)
     boxplot_stuff_median = np.median(boxplot_stuff, axis=0)
-
-    stamp = make_timestamp()
+    
+    if time_stamp is None:
+        stamp = make_timestamp()
+    else:
+        stamp = time_stamp
     for data, desc in [
         (boxplot_stuff_mean, "boxplot_mean")
         ,(boxplot_stuff_median, "boxplot_median")
@@ -124,17 +128,18 @@ def better_estimates_2chains_8schools():
     t_short = tv_bound[tv_bound <=.25].first_valid_index()
     t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
     chain_size = 2_000
-    reps = 100
+    reps = 8
+    stamp = make_timestamp() #common timestamp to make life simple
     rng = np.random.default_rng(2025)
 
     good_inference = get_avg_estimates_8schools(
         burn_in = t_long, replications = reps, n=chain_size,rng=rng
-        ,label = "long"
+        ,label = "long", time_stamp = stamp
     )
 
     bad_inference = get_avg_estimates_8schools(
         burn_in = t_short, replications = reps, n=chain_size,rng=rng
-        ,label = "short"
+        ,label = "short", time_stamp = stamp
     )   
     return good_inference,bad_inference
 
