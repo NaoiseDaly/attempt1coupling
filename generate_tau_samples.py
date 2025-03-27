@@ -607,7 +607,7 @@ def at2_8schools_coupled_mcmc(lag:int, max_t_iterations=10**4, random_state = No
         
         elif index == 9:#population variance-----------Altering
             #take small steps
-            return norm(loc = tau, scale =3)
+            return norm(loc = tau, scale =2)
         
     #then in the two other functions either get a sampler or log density
     def proposal_dist_logpdf(index, current_state):
