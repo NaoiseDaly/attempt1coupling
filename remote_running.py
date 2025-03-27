@@ -124,7 +124,7 @@ def better_estimates_2chains_8schools():
     t_short = tv_bound[tv_bound <=.25].first_valid_index()
     t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
     chain_size = 2_000
-    reps = 8
+    reps = 100
     rng = np.random.default_rng(2025)
 
     good_inference = get_avg_estimates_8schools(
