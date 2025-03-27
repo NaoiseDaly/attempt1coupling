@@ -132,10 +132,11 @@ def better_estimates_2chains_8schools():
         at2_8schools_coupled_mcmc
         ,lags = [3_000,5_000], num_tau_samples = 100
     ) 
-    tau_data_f = save_df_with_timestamp(tau_data, "tau lag")
+    tau_data_f = save_df_with_timestamp(tau_data, f"{this_func} tau lag")
     remote_logger.info(f"saved meeting times data {tau_data_f}")
 
-    tv_data_f = estimate_TV_from_file(tau_data_f, num_ts = 1_000)
+    tv_data_f = estimate_TV_from_file(tau_data_f, num_ts = 1_000
+                                      , save_msg= f"{this_func} TV est")
     remote_logger.info(f"saved TV ests as {tv_data_f}")
     tv_data = read_df_file(tv_data_f)
     biggest_lag = str(max(int(col) for col in tv_data.columns))
