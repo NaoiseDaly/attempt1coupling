@@ -123,7 +123,6 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int
 
 def better_estimates_2chains_8schools():
     this_func = better_estimates_2chains_8schools.__name__
-    stamp = make_timestamp() #common timestamp to make life simple
     remote_logger.info(f"Starting {this_func}")
 
     #get tau data
@@ -148,6 +147,8 @@ def better_estimates_2chains_8schools():
     chain_size = 1_000
     reps = 100
     rng = np.random.default_rng(2025)
+    stamp = make_timestamp() #common timestamp to make life simple
+
 
     remote_logger.info(f"getting {t_long=} chains")
     good_inference = get_avg_estimates_8schools(
