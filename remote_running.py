@@ -80,7 +80,7 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int
                                , rng:np.random.default_rng,label="", time_stamp = None):
     """`WARNING` only run this function inside an `__name__ == "__main__"` block.  `WARNING`"""
     this_func = get_avg_estimates_8schools.__name__
-    remote_logger.info(f"Starting {this_func}")
+    remote_logger.info(f"Starting {this_func}--{label}")
     start = perf_counter()
 
     boxplot_stuff = np.zeros(shape=(replications, 5,10)) #5 quantiles on 10 params
@@ -116,7 +116,7 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int
     remote_logger.info(f"saved {label} files end with {stamp}")
     end = perf_counter()
     remote_logger.info(f"{burn_in=} {n=} {replications=} took {pretty_print_seconds(end-start)}")
-    remote_logger.info(f"Done {this_func}")
+    remote_logger.info(f"Done {this_func}--{label}")
 
     return boxplot_stuff_mean, boxplot_stuff_median
 
