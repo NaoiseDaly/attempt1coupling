@@ -539,7 +539,7 @@ def at2_8schools_coupled_mcmc(lag:int, max_t_iterations=10**4, random_state = No
     x_chain[0,p-1] = uniform.rvs(loc =1, scale =30, random_state =rng)#make sure population variance is positive
     y_chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p)).rvs( random_state =rng)
     #initialse tau outside of the high density area of the target-----------Altering
-    y_chain[0,p-1] = uniform.rvs(loc =10, scale =20, random_state =rng)#make sure population variance is positive
+    y_chain[0,p-1] = uniform.rvs(loc =15, scale =20, random_state =rng)#make sure population variance is positive
 
     #handy to have
     def get_v_mu_and_mu_hat_given_tau(tau:float):
@@ -607,7 +607,7 @@ def at2_8schools_coupled_mcmc(lag:int, max_t_iterations=10**4, random_state = No
         
         elif index == 9:#population variance-----------Altering
             #take small steps
-            return norm(loc = tau, scale =5)
+            return norm(loc = tau, scale =1)
         
     #then in the two other functions either get a sampler or log density
     def proposal_dist_logpdf(index, current_state):
