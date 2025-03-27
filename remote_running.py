@@ -121,6 +121,9 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int
     return boxplot_stuff_mean, boxplot_stuff_median
 
 def better_estimates_2chains_8schools():
+    this_func = better_estimates_2chains_8schools.__name__
+    remote_logger.info(f"Starting {this_func}")
+
     tv_bound = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv"
                        ,"8schools example" )["3000"]
 
@@ -136,11 +139,13 @@ def better_estimates_2chains_8schools():
         burn_in = t_long, replications = reps, n=chain_size,rng=rng
         ,label = "long", time_stamp = stamp
     )
-
+    remote_logger.info(f"halfway through {this_func}")
     bad_inference = get_avg_estimates_8schools(
         burn_in = t_short, replications = reps, n=chain_size,rng=rng
         ,label = "short", time_stamp = stamp
     )   
+
+    remote_logger.info(f"Done {this_func}")
     return good_inference,bad_inference
 
 def get_big_mcmc_sample():
