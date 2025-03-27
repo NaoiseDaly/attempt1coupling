@@ -134,7 +134,9 @@ def better_estimates_2chains_8schools():
     tau_data_f = save_df_with_timestamp(tau_data, f"{this_func} tau lag")
     remote_logger.info(f"saved meeting times data {tau_data_f}")
 
-    tv_data_f = estimate_TV_from_file(tau_data_f, num_ts = 1_000
+    #TV stuff
+    num_ts = 2_000
+    tv_data_f = estimate_TV_from_file(tau_data_f, num_ts = num_ts
                                       , save_msg= f"{this_func} TV est")
     remote_logger.info(f"saved TV ests as {tv_data_f}")
     tv_data = read_df_file(tv_data_f)
@@ -143,9 +145,15 @@ def better_estimates_2chains_8schools():
 
     #the TV is non increasing so this is safe
     t_short = tv_bound[tv_bound <=.25].first_valid_index()
+    if t_short is None:
+        t_short = num_ts//4 #not correct but surely wont happen
     t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
+    if t_long is None:
+        t_long = num_ts #so things dont break if num_ts was too small
+
+
     chain_size = 1_000
-    reps = 100
+    reps = 200
     rng = np.random.default_rng(2025)
     stamp = make_timestamp() #common timestamp to make life simple
 
