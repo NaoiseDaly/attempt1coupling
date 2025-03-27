@@ -123,24 +123,37 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int
 
 def better_estimates_2chains_8schools():
     this_func = better_estimates_2chains_8schools.__name__
+    stamp = make_timestamp() #common timestamp to make life simple
     remote_logger.info(f"Starting {this_func}")
 
-    tv_bound = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv"
-                       ,"8schools example" )["3000"]
+    #get tau data
+    remote_logger.info(f"getting meeting times data")
+    tau_data = sample_tau_L_for_many_lags(
+        at2_8schools_coupled_mcmc
+        ,lags = [3_000,5_000], num_tau_samples = 2
+    ) 
+    tau_data_f = save_df_with_timestamp(tau_data, "tau lag")
+    remote_logger.info(f"saved meeting times data {tau_data_f}")
+
+    tv_data_f = estimate_TV_from_file(tau_data_f, num_ts = 1_000)
+    remote_logger.info(f"saved TV ests as {tv_data_f}")
+    tv_data = read_df_file(tv_data_f)
+    biggest_lag = str(max(int(col) for col in tv_data.columns))
+    tv_bound = tv_data[biggest_lag]
 
     #the TV is non increasing so this is safe
     t_short = tv_bound[tv_bound <=.25].first_valid_index()
     t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
     chain_size = 2_000
-    reps = 100
-    stamp = make_timestamp() #common timestamp to make life simple
+    reps = 8
     rng = np.random.default_rng(2025)
 
+    remote_logger.info(f"getting {t_long=} chains")
     good_inference = get_avg_estimates_8schools(
         burn_in = t_long, replications = reps, n=chain_size,rng=rng
         ,label = "long", time_stamp = stamp
     )
-    remote_logger.info(f"halfway through {this_func}")
+    remote_logger.info(f"getting {t_short} chains")
     bad_inference = get_avg_estimates_8schools(
         burn_in = t_short, replications = reps, n=chain_size,rng=rng
         ,label = "short", time_stamp = stamp
