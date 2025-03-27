@@ -666,11 +666,11 @@ def at2_8schools_coupled_mcmc(lag:int, max_t_iterations=10**4, random_state = No
             if not return_chain:
                 break # no need to continue, tau observed
 
-    # if meeting_time is None:-----------Altering
-    #     logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
     
     if return_chain:
         #get rid of the initialised bits of Y never populated
         return x_chain, y_chain[0:(max_t_iterations-lag),]
     else:
+        if meeting_time is None:#-----------Altering
+            logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
         return meeting_time
