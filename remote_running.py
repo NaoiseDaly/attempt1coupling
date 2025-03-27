@@ -64,7 +64,7 @@ def run_2_chain_8schools():
 
 def get_one_estimates_8schools(burn_in:int, n:int, seed:int):
     #get a sample
-    chain, _ = at1_8schools_coupled_mcmc(
+    chain, _ = at2_8schools_coupled_mcmc(
         lag = 1, 
         random_state = seed
         , return_chain = True
@@ -80,7 +80,7 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int
                                , rng:np.random.default_rng,label="", time_stamp = None):
     """`WARNING` only run this function inside an `__name__ == "__main__"` block.  `WARNING`"""
     this_func = get_avg_estimates_8schools.__name__
-    remote_logger.info(f"Starting {this_func}--{label}")
+    remote_logger.info(f"Starting {this_func}\t{label}")
     start = perf_counter()
 
     boxplot_stuff = np.zeros(shape=(replications, 5,10)) #5 quantiles on 10 params
@@ -104,6 +104,7 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int
         stamp = make_timestamp()
     else:
         stamp = time_stamp
+
     for data, desc in [
         (boxplot_stuff_mean, "boxplot_mean")
         ,(boxplot_stuff_median, "boxplot_median")
@@ -116,7 +117,7 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int
     remote_logger.info(f"saved {label} files end with {stamp}")
     end = perf_counter()
     remote_logger.info(f"{burn_in=} {n=} {replications=} took {pretty_print_seconds(end-start)}")
-    remote_logger.info(f"Done {this_func}--{label}")
+    remote_logger.info(f"Done {this_func}\t{label}")
 
     return boxplot_stuff_mean, boxplot_stuff_median
 

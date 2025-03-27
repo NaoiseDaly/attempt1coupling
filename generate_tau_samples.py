@@ -519,3 +519,158 @@ def at1_8schools_coupled_mcmc(lag:int, max_t_iterations=10**4, random_state = No
     else:
         return meeting_time
     
+def at2_8schools_coupled_mcmc(lag:int, max_t_iterations=10**4, random_state = None, return_chain =False):
+    """
+    Single chain target joint posterior in 8 schools problem
+    Tweaked so the downstream results are interesting
+    """
+    #set up
+    p = 8+2 #group means plus mu plus tau
+    meeting_time = None
+    #idk will this help algo speed
+    dat = DATA.copy(deep=True)
+
+    rng = np.random.default_rng(random_state)
+    log_unifs = np.log(uniform.rvs(size = max_t_iterations+1, random_state = rng)) 
+
+    x_chain, y_chain = np.zeros(shape=(max_t_iterations,p)), np.zeros(shape=(max_t_iterations,p))
+    #could do this based on estimates from data
+    x_chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p)).rvs( random_state =rng)
+    x_chain[0,p-1] = uniform.rvs(loc =1, scale =30, random_state =rng)#make sure population variance is positive
+    y_chain[0,] = multivariate_normal(cov = (50**2)*np.identity(p)).rvs( random_state =rng)
+    #initialse tau outside of the high density area of the target-----------Altering
+    y_chain[0,p-1] = uniform.rvs(loc =30, scale =60, random_state =rng)#make sure population variance is positive
+
+    #handy to have
+    def get_v_mu_and_mu_hat_given_tau(tau:float):
+
+        total_precision = np.sum( 1/(tau**2 +dat["sigma.j"]**2)  )
+
+        average = np.sum(dat["yBar.j"]/(tau**2 +dat["sigma.j"]**2 ) )
+        precision_weighted_average = average/total_precision
+
+        return total_precision, precision_weighted_average
+
+    def get_v_j_and_theta_j_hat_given_hypparams(mu, tau, index):
+            sample_mean = dat["yBar.j"][index]
+            sigma_sq = dat["sigma.j"][index]**2
+            tau_sq = tau**2
+            var = 1/( (1/sigma_sq)+(1/tau_sq) )
+            theta_j = ( (sample_mean/sigma_sq)+(mu/tau_sq) )*var
+
+            return var, theta_j
+
+    def log_unnormalised_target2(state, index):
+            mu, tau = state[8], state[9]
+            v_mu, mu_hat = get_v_mu_and_mu_hat_given_tau(tau)
+
+            #mu part Normal conditioned on tau
+            #the exp bit of a normal
+            if index ==8:
+                return -.5*v_mu*((mu-mu_hat)**2)
+
+            #tau part 
+            if index ==9:
+                if tau <= 0:
+                    return -np.inf #log of zero
+                else:
+                    log_total_prec = np.log(v_mu)
+
+                    big_sum = np.log(dat["sigma.j"]**2 + tau**2) + (dat["yBar.j"] - mu_hat)**2/(dat["sigma.j"]**2 + tau**2)
+                    big_sum = np.sum(big_sum)
+
+                    return -.5*( log_total_prec + big_sum )
+
+            # group parts Normal conditioned on mu, tau
+            var, theta_j = get_v_j_and_theta_j_hat_given_hypparams(mu, tau, index)
+            #the exp bit of a normal
+            return -.5*(1/var)*((state[index]-theta_j)**2)
+
+
+
+    def log_alpha(current, new, index):
+        r = log_unnormalised_target2(new, index)-log_unnormalised_target2(current,index)
+        return min(0, r)
+
+    #abstraction
+    #get the proposal distribution for each component
+    def proposal_general(index, current_state):
+    
+        mu, tau = current_state[8], current_state[9]
+        if index <=7:#group effects
+            v_j, theta_j = get_v_j_and_theta_j_hat_given_hypparams(mu, tau, index)
+            return norm(loc = theta_j, scale = v_j**.5)
+        
+        elif index == 8:#population mean
+            total_precision, precision_weighted_average = get_v_mu_and_mu_hat_given_tau(tau)
+            return norm(loc = precision_weighted_average, scale = total_precision**-.5)
+        
+        elif index == 9:#population variance-----------Altering
+            #take small steps
+            return norm(loc = tau, scale =.5)
+        
+    #then in the two other functions either get a sampler or log density
+    def proposal_dist_logpdf(index, current_state):
+        return proposal_general(index, current_state).logpdf
+    def proposal_dist_sampler(index, current_state):
+        return proposal_general(index, current_state).rvs
+
+    #run X chain for lag steps
+    for t in range(1,lag+1):
+        current_state = x_chain[t-1,]
+
+        proposed_state = current_state.copy()
+        #update a randomly selected component
+        index = rng.choice(p,1)[0]
+        proposed_state[index] = proposal_dist_sampler(index, current_state)(random_state=rng)
+
+        #accept/reject
+        log_u = log_unifs[t]
+        if log_u <= log_alpha(current_state, proposed_state, index):
+            x_chain[t] = proposed_state
+        else:
+            x_chain[t] = current_state
+    
+    #couple the chains
+    for t in range(lag+1, max_t_iterations):
+        current_x, current_y = x_chain[t-1], y_chain[t-lag-1]
+
+        proposed_x, proposed_y = current_x.copy(), current_y.copy()
+        #update a randomly selected component
+        index = rng.choice(p,1)[0]
+        new_comp_x, new_comp_y = max_coupling_algo1(
+                proposal_dist_logpdf(index, current_x)
+                ,proposal_dist_logpdf(index, current_y)
+                ,proposal_dist_sampler(index, current_x)
+                ,proposal_dist_sampler(index, current_y)
+                ,rng             
+        )
+        proposed_x[index], proposed_y[index] = new_comp_x, new_comp_y 
+        
+        #accept/reject with common random numbers
+        log_u = log_unifs[t]
+
+        if log_u <= log_alpha(current_x, proposed_x, index):
+            x_chain[t] = proposed_x
+        else:
+            x_chain[t] = current_x
+        if log_u <= log_alpha(current_y, proposed_y, index):
+            y_chain[t-lag] = proposed_y
+        else:
+            y_chain[t-lag] = current_y
+
+        #check for meeting
+        if not meeting_time and (y_chain[t-lag,] == x_chain[t,]).all() : 
+            #first time meeting
+            meeting_time = t
+            if not return_chain:
+                break # no need to continue, tau observed
+
+    # if meeting_time is None:-----------Altering
+    #     logger.warning(f"Chains did not meet after {max_t_iterations:,} steps {random_state=}")
+    
+    if return_chain:
+        #get rid of the initialised bits of Y never populated
+        return x_chain, y_chain[0:(max_t_iterations-lag),]
+    else:
+        return meeting_time
