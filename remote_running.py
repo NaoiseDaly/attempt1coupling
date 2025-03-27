@@ -145,7 +145,7 @@ def better_estimates_2chains_8schools():
     #the TV is non increasing so this is safe
     t_short = tv_bound[tv_bound <=.25].first_valid_index()
     t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
-    chain_size = 2_000
+    chain_size = 1_000
     reps = 100
     rng = np.random.default_rng(2025)
 
