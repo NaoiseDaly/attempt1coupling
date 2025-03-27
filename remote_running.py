@@ -130,7 +130,7 @@ def better_estimates_2chains_8schools():
     remote_logger.info(f"getting meeting times data")
     tau_data = sample_tau_L_for_many_lags(
         at2_8schools_coupled_mcmc
-        ,lags = [3_000,5_000], num_tau_samples = 100
+        ,lags = [3_000,5_000], num_tau_samples = 10
     ) 
     tau_data_f = save_df_with_timestamp(tau_data, f"{this_func} tau lag")
     remote_logger.info(f"saved meeting times data {tau_data_f}")
