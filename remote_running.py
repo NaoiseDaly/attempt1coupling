@@ -130,7 +130,7 @@ def better_estimates_2chains_8schools():
     remote_logger.info(f"getting meeting times data")
     tau_data = sample_tau_L_for_many_lags(
         at2_8schools_coupled_mcmc
-        ,lags = [3_000,5_000], num_tau_samples = 10
+        ,lags = [3_000,5_000], num_tau_samples = 100
     ) 
     tau_data_f = save_df_with_timestamp(tau_data, f"{this_func} tau lag")
     remote_logger.info(f"saved meeting times data {tau_data_f}")
@@ -154,7 +154,7 @@ def better_estimates_2chains_8schools():
         burn_in = t_long, replications = reps, n=chain_size,rng=rng
         ,label = "long", time_stamp = stamp
     )
-    remote_logger.info(f"getting {t_short} chains")
+    remote_logger.info(f"getting {t_short=} chains")
     bad_inference = get_avg_estimates_8schools(
         burn_in = t_short, replications = reps, n=chain_size,rng=rng
         ,label = "short", time_stamp = stamp
