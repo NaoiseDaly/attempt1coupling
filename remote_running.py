@@ -76,7 +76,7 @@ def get_one_estimates_8schools(burn_in:int, n:int, seed:int):
     return est_1
 
 
-def get_avg_estimates_8schools(burn_in:int, replications:int,n:int, rng:np.random.default_rng):
+def get_avg_estimates_8schools(burn_in:int, replications:int,n:int, rng:np.random.default_rng,label=""):
     """`WARNING` only run this function inside an `__name__ == "__main__"` block.  `WARNING`"""
     this_func = get_avg_estimates_8schools.__name__
     remote_logger.info(f"Starting {this_func}")
@@ -95,13 +95,26 @@ def get_avg_estimates_8schools(burn_in:int, replications:int,n:int, rng:np.rando
         for i, tup in enumerate(output_list):
             boxplot_stuff[i,] = tup
 
-    #Monte Carlo
-    boxplot_stuff = boxplot_stuff.mean(axis=0)
+    #Average the results
+    boxplot_stuff_mean = boxplot_stuff.mean(axis=0)
+    boxplot_stuff_median = np.median(boxplot_stuff, axis=0)
 
+    stamp = make_timestamp()
+    for data, desc in [
+        (boxplot_stuff_mean, "boxplot_mean")
+        ,(boxplot_stuff_median, "boxplot_median")
+        ]:
+        f_path = os.path.join("logs_and_data",
+                              f"8schools_rep_{label}_{desc}_{stamp}.csv"
+                              )
+        np.savetxt(fname = f_path, X = data, delimiter=",")
+    
+    remote_logger.info(f"saved {label} files end with {stamp}")
     end = perf_counter()
     remote_logger.info(f"{burn_in=} {n=} {replications=} took {pretty_print_seconds(end-start)}")
     remote_logger.info(f"Done {this_func}")
-    return boxplot_stuff
+
+    return boxplot_stuff_mean, boxplot_stuff_median
 
 def better_estimates_2chains_8schools():
     tv_bound = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv"
@@ -116,10 +129,12 @@ def better_estimates_2chains_8schools():
 
     good_inference = get_avg_estimates_8schools(
         burn_in = t_long, replications = reps, n=chain_size,rng=rng
+        ,label = "long"
     )
 
     bad_inference = get_avg_estimates_8schools(
         burn_in = t_short, replications = reps, n=chain_size,rng=rng
+        ,label = "short"
     )   
     return good_inference,bad_inference
 
@@ -176,12 +191,13 @@ if __name__ == "__main__":
     remote_logger.info("\n") # add a line to seperate this execution from any others
 
     
-    good, bad = better_estimates_2chains_8schools()
-    bxp_stats_good = make_boxplot_stats_from_quantiles(good)
-    bxp_stats_bad = make_boxplot_stats_from_quantiles(bad)
-    d = good.shape[1]
-    boxplot_two_chains_side_by_side2(bxp_stats_good,bxp_stats_bad
-                                     ,"long", "short", dim =d)
+    (good_mean,good_median), (bad_mean,bad_median) = better_estimates_2chains_8schools()
+    # for good, bad  in [(good_mean, bad_mean),(good_median, bad_median)]:
+    #     bxp_stats_good = make_boxplot_stats_from_quantiles(good)
+    #     bxp_stats_bad = make_boxplot_stats_from_quantiles(bad)
+    #     d = good_mean.shape[1]
+    #     boxplot_two_chains_side_by_side2(bxp_stats_good,bxp_stats_bad
+    #                                     ,"long", "short", dim =d)
     # get_tv_est_8schools()
     # run_2_chain_8schools()
 
