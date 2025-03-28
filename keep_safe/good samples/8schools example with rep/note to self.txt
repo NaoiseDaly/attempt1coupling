@@ -1,0 +1,15 @@
+8schools_rep_good_long_chain_2025-03-27 Thu 23-45.csv
+8schools_rep_good_long_chain_2025-03-27 Thu 23-45.csv
+were created from 
+    long_chain, _  = at2_8schools_coupled_mcmc(
+        lag=1, random_state =seed, return_chain = True
+        ,max_t_iterations = 1000+t_long
+    )
+    long_chain = long_chain[t_long:,]
+
+    short_chain ,_  = at2_8schools_coupled_mcmc(
+        lag=1, random_state =seed, return_chain = True
+        ,max_t_iterations = 1000+t_short
+    )
+    short_chain = short_chain[t_short:]
+ with 519 and 1408 and seed =  1
