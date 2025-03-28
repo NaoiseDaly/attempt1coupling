@@ -549,8 +549,8 @@ def boxplot_two_chains_side_by_side(a,b, a_name=None, b_name = None, var_names= 
         ax.set_title(title)
     plt.show()
 
-def boxplot_two_chains_side_by_side2(a_stats,b_stats, a_name=None, b_name = None
-                                     , dim = 1, var_names= None, title = None):
+def boxplot_two_chains_side_by_side2(a_stats,b_stats, dim, a_name=None, b_name = None
+                                     , var_names= None, title = None):
     """
     Uses matplotlibs `bxp` so takes the quantiles of the boxplots-not the data
     Needs to know `d` the number of boxplots per chain
