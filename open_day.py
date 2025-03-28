@@ -91,10 +91,6 @@ def animate_univariate_chains_meeting(x_chain, y_chain_shifted, title=""):
         ax.set_xlabel("time")
         if title:
             ax.set_title(title)
-        else:
-            ax.set_title(
-                f"coupled chains with a lag of {lag}"
-            )
 
         scat1.set_color("red")
         scat2.set_color("blue")
