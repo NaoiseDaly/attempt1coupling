@@ -178,18 +178,96 @@ def plt_example():
     ani = animation.FuncAnimation(fig=fig, func=update, frames=40, interval=60)
     plt.show()
 
+def last_chapter():
+
+    #read in TV est
+    folder = "8schools example with rep"
+    tv_ests = read_demo_df_file("better_estimates_2chains_8schools TV est 2025-03-27 Thu 16-58.csv"
+                                ,folder)
+    plot_tv_upper_bound_t_long_short(tv_ests
+                                     ,"Estimated distance to stationarity for 8 schools posterior")
+
+    biggest_lag = str(max(int(col) for col in tv_ests.columns))
+    tv_bound = tv_ests[biggest_lag]
+    num_ts = len(tv_bound)
+
+    #the TV is non increasing so this is safe
+    t_short = tv_bound[tv_bound <=.25].first_valid_index()
+    if t_short is None:
+        t_short = num_ts #not correct but surely wont happen
+    t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
+    if t_long is None:
+        t_long = num_ts #so things dont break if num_ts was too small
+    #519 1408
+    t_l, t_s = r"$t^{\text{long}}$", r"$t^{\text{short}}$"
+
+    #read in t^long, t^short chains
+    long_chain = read_good_sample_np_csv("8schools_rep_good_long_chain_2025-03-27 Thu 23-45.csv"
+                                         ,"8schools example with rep")
+    short_chain = read_good_sample_np_csv("8schools_rep_good_short_chain_2025-03-27 Thu 23-45.csv"
+                                         ,"8schools example with rep")
+    
+    comp_names = [rf"$\theta_{j}$" for j in range(1,8+1) ]
+    comp_names.extend([r"$\mu$", r"$\tau$"])
+    # trace_plot_10_comps(short_chain, comp_names)
+    # trace_plot_10_comps(long_chain, comp_names)
+    
+    #show population parameters boxplot
+    short_bxp = make_boxplot_stats_from_quantiles(
+        make_boxplot_quantiles(short_chain[:,8:])
+    )
+    long_bxp = make_boxplot_stats_from_quantiles(
+        make_boxplot_quantiles(long_chain[:,8:])
+    )
+    boxplot_two_chains_side_by_side2(long_bxp, short_bxp, dim =2
+                                     ,a_name = t_l, b_name = t_s
+                                     ,var_names = comp_names[8:]
+                                     ,title = "Distribution of population parameters\nsampled using different burn in points"
+                                     )
+
+    #show group parameters boxplots
+    short_bxp = make_boxplot_stats_from_quantiles(
+        make_boxplot_quantiles(short_chain[:,:8])
+    )
+    long_bxp = make_boxplot_stats_from_quantiles(
+        make_boxplot_quantiles(long_chain[:,:8])
+    )
+    boxplot_two_chains_side_by_side2(long_bxp, short_bxp, dim =8
+                                     ,a_name = t_l, b_name = t_s
+                                     ,var_names = comp_names[:8]
+                                     ,title = "Distribution of group parameters\nsampled using different burn in points"
+                                     )
+    
+
+    
+    #show marginal hist of tau
+    tau_ind = 9
+    fig, (ax1,ax2) = plt.subplots(1,2,sharex = True, sharey=True)
+    num_bins = 10
+    ax2.hist(short_chain[:,tau_ind],bins = num_bins, color= "bisque", density = True)
+    ax1.hist(long_chain[:,tau_ind],bins = num_bins, color= "violet",density=True )
+
+    ax2.set_title(rf"Using {t_s} burn in")
+    ax2.set_xlabel(r"$\tau$")
+    ax1.set_title(rf"Using {t_l} burn in")
+    ax1.set_xlabel(r"$\tau$")
+    
+    fig.supylabel(r"Density")
+    fig.suptitle(r"Marginal posterior density for $\tau$", fontsize =16)
+    plt.show()
+
 
 if __name__ == "__main__":
     # with a seed of 0 the target is mean 27 sd 2
     #and the initilisation is close
-    x, y, lag = get_univariate_coupled_chain(0)
-    plt.plot(x)
-    plt.title(r"Markov chain a target dist of $N(\mu=27, \sigma^2=4)$")
-    plt.show()
+    # x, y, lag = get_univariate_coupled_chain(0)
+    # plt.plot(x)
+    # plt.title(r"Markov chain a target dist of $N(\mu=27, \sigma^2=4)$")
+    # plt.show()
 
-    title = fr"Coupled chains with lag {lag} targeting $N(\mu=27, \sigma^2=4)$"
-    animate_univariate_chains_meeting(x,y, title)
-    animate_L2_dist_of_chains(x,y, lag)
+    # title = fr"Coupled chains with lag {lag} targeting $N(\mu=27, \sigma^2=4)$"
+    # animate_univariate_chains_meeting(x,y, title)
+    # animate_L2_dist_of_chains(x,y, lag)
 
     # y = np.genfromtxt(
     #     os.path.join("keep_safe","3D-MVN-sample","lagged-chain.csv")
@@ -204,4 +282,6 @@ if __name__ == "__main__":
     # y = np.pad(y,((lag,0),(0,0)), mode = "constant", constant_values = np.nan)
     # print(x.shape,y.shape)
     # # animate_L2_dist_of_chains(x,y,lag)
+
+    last_chapter()
     
