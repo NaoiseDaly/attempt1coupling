@@ -254,30 +254,38 @@ def last_chapter():
 
 
 if __name__ == "__main__":
-    # with a seed of 0 the target is mean 27 sd 2
-    #and the initilisation is close
-    # x, y, lag = get_univariate_coupled_chain(0)
-    # plt.plot(x)
-    # plt.title(r"Markov chain a target dist of $N(\mu=27, \sigma^2=4)$")
-    # plt.show()
+    x, y, lag = get_univariate_coupled_chain(0)     # with a seed of 0 the initialisation is good
+    fig, ax = plt.subplots(1)
+    ax.plot(x)
+    ax.set_title(r"Markov chain with a target dist of $N(\mu=27, \sigma^2=4)$")
+    ax.set_ylabel("State space" )
+    ax.set_xlabel("time")
+    plt.show()
 
-    # title = fr"Coupled chains with lag {lag} targeting $N(\mu=27, \sigma^2=4)$"
-    # animate_univariate_chains_meeting(x,y, title)
-    # animate_L2_dist_of_chains(x,y, lag)
+    title = fr"Coupled chains with lag {lag} targeting $N(\mu=27, \sigma^2=4)$"
+    animate_univariate_chains_meeting(x,y, title)
+    animate_L2_dist_of_chains(x,y, lag, "Distance between the coupled chains")
 
-    # y = np.genfromtxt(
-    #     os.path.join("keep_safe","3D-MVN-sample","lagged-chain.csv")
-    #     ,delimiter = ","
-    # )
-    # x = np.genfromtxt(
-    #     os.path.join("keep_safe","3D-MVN-sample","nonlagged-chain.csv")
-    #     ,delimiter = ","
-    # )
+    y = np.genfromtxt(
+        os.path.join("keep_safe","3D-MVN-sample","lagged-chain.csv")
+        ,delimiter = ","
+    )
+    x = np.genfromtxt(
+        os.path.join("keep_safe","3D-MVN-sample","nonlagged-chain.csv")
+        ,delimiter = ","
+    )
+    lag = 500
+    y = np.pad(y,((lag,0),(0,0)), mode = "constant", constant_values = np.nan)
+    title = rf"Coupling with lag {lag} targeting highly autocorrelated $N_3(\mu,\Sigma)$"
+    animate_L2_dist_of_chains(x,y,lag, title)
 
-    # lag = 500
-    # y = np.pad(y,((lag,0),(0,0)), mode = "constant", constant_values = np.nan)
-    # print(x.shape,y.shape)
-    # # animate_L2_dist_of_chains(x,y,lag)
 
+    tv_ests = read_demo_df_file(
+        "TV est 2025-02-17 Mon 21-38.csv"
+        ,"MVN3-haar-cov"
+    )
+    title = r"Estimated distance to stationarity for highly autocorrelated $N_3(\mu,\Sigma)$"
+    plot_tv_upper_bound(tv_ests, title)
+    
     last_chapter()
     
