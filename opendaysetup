@@ -1,0 +1,7 @@
+cd ~/Desktop/
+git clone https://github.com/NaoiseDaly/attempt1coupling
+cd attempt1coupling
+code -h
+mkdir logs_and_data
+touch logs_and_data/MCMCcouplingSimulation.log
+
