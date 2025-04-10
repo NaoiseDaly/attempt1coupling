@@ -129,7 +129,7 @@ def better_estimates_2chains_8schools():
     remote_logger.info(f"getting meeting times data")
     tau_data = sample_tau_L_for_many_lags(
         at2_8schools_coupled_mcmc
-        ,lags = [3_000,5_000], num_tau_samples = 200
+        ,lags = [3_000,5_000,8_000], num_tau_samples = 500
     ) 
     tau_data_f = save_df_with_timestamp(tau_data, f"{this_func} tau lag")
     remote_logger.info(f"saved meeting times data {tau_data_f}")
@@ -224,8 +224,8 @@ if __name__ == "__main__":
 
     remote_logger.info("\n") # add a line to seperate this execution from any others
 
-    
-    (good_mean,good_median), (bad_mean,bad_median) = better_estimates_2chains_8schools()
+    better_estimates_2chains_8schools()
+    # (good_mean,good_median), (bad_mean,bad_median) = better_estimates_2chains_8schools()
     # for good, bad  in [(good_mean, bad_mean),(good_median, bad_median)]:
     #     bxp_stats_good = make_boxplot_stats_from_quantiles(good)
     #     bxp_stats_bad = make_boxplot_stats_from_quantiles(bad)
@@ -233,7 +233,7 @@ if __name__ == "__main__":
     #     boxplot_two_chains_side_by_side2(bxp_stats_good,bxp_stats_bad
     #                                     ,"long", "short", dim =d)
     # get_tv_est_8schools()
-    # run_2_chain_8schools()
+    run_2_chain_8schools()
 
     # get_big_mcmc_sample()
     # # do not call sample_tau_L_for_many_lags outside of here 
