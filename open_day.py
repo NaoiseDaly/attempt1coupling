@@ -180,8 +180,8 @@ def last_chapter():
     folder = "8schools example with rep"
     tv_ests = read_demo_df_file("better_estimates_2chains_8schools TV est 2025-03-27 Thu 16-58.csv"
                                 ,folder)
-    plot_tv_upper_bound_t_long_short(tv_ests
-                                     ,"Estimated distance to stationarity for 8 schools posterior")
+    tv_dist_title = "Estimated distance to stationarity for 8 schools posterior"
+    plot_tv_upper_bound_t_long_short(tv_ests, tv_dist_title)
 
     biggest_lag = str(max(int(col) for col in tv_ests.columns))
     tv_bound = tv_ests[biggest_lag]
@@ -205,8 +205,8 @@ def last_chapter():
     
     comp_names = [rf"$\theta_{j}$" for j in range(1,8+1) ]
     comp_names.extend([r"$\mu$", r"$\tau$"])
-    # trace_plot_10_comps(short_chain, comp_names)
-    # trace_plot_10_comps(long_chain, comp_names)
+    trace_plot_10_comps(short_chain, comp_names)
+    trace_plot_10_comps(long_chain, comp_names)
     
     #show population parameters boxplot
     short_bxp = make_boxplot_stats_from_quantiles(
@@ -238,6 +238,16 @@ def last_chapter():
     
     #show marginal hist of tau
     tau_ind = 9
+    fig, ax = plt.subplots()
+    ax.plot(long_chain[:,tau_ind], color='green', linestyle='-')
+    ax.set_title(rf"Trace plot for $\tau$")
+    plt.show()
+    mu_ind = 8
+    fig, ax = plt.subplots()
+    ax.plot(long_chain[:,mu_ind], color='green', linestyle='-')
+    ax.set_title(rf"Trace plot for $\mu$")
+    plt.show()
+
     fig, (ax1,ax2) = plt.subplots(1,2,sharex = True, sharey=True)
     num_bins = 10
     ax2.hist(short_chain[:,tau_ind],bins = num_bins, color= "bisque", density = True)
@@ -251,6 +261,11 @@ def last_chapter():
     fig.supylabel(r"Density")
     fig.suptitle(r"Marginal posterior density for $\tau$", fontsize =16)
     plt.show()
+
+    #redoing the TV bound with more tua samples-> less Monte Carlo error -> smoother lines
+    tv_ests = read_demo_df_file("better_estimates_2chains_8schools TV est 2025-04-10 Thu 12-11.csv"
+                                ,folder)
+    plot_tv_upper_bound_t_long_short(tv_ests, tv_dist_title, t_long = .02)#shush
 
 
 if __name__ == "__main__":
