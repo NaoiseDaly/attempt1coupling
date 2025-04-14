@@ -152,7 +152,7 @@ def better_estimates_2chains_8schools():
         t_long = num_ts #so things dont break if num_ts was too small
 
 
-    chain_size = 1_000
+    chain_size = 2_000
     reps = 100
     rng = np.random.default_rng(2025)
     stamp = make_timestamp() #common timestamp to make life simple
@@ -223,7 +223,6 @@ if __name__ == "__main__":
 
 
     remote_logger.info("\n") # add a line to seperate this execution from any others
-
     better_estimates_2chains_8schools()
     # (good_mean,good_median), (bad_mean,bad_median) = better_estimates_2chains_8schools()
     # for good, bad  in [(good_mean, bad_mean),(good_median, bad_median)]:
