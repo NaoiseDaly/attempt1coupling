@@ -139,31 +139,94 @@ pop var is updated using a MH random walk.
 tau_f = read_demo_df_file("at1_8schools_coupled_mcmc-tau-data 2025-03-15 Sat 21-54.csv"
                           ,"8schools example").drop(columns="500") #500 maybe too low
 
-plot_tau_stuff(tau_f, "spread of meeting times ")
+# plot_tau_stuff(tau_f, "spread of meeting times ")
 
 tv_ests = read_demo_df_file("at1_8schools_coupled_mcmc-tv-ests 2025-03-15 Sat 21-54.csv"
                        ,"8schools example" ).drop(columns="500") #500 maybe too low
 
 
 tv_bound = tv_ests["3000"]
-print(tv_bound[tv_bound <=.25].head(1))
-print(tv_bound[tv_bound <=(1-.99)].head(1))
-plot_tv_upper_bound(tv_ests, "target is 8 schools example")
+# print(tv_bound[tv_bound <=.25].head(1))
+# print(tv_bound[tv_bound <=(1-.99)].head(1))
+# plot_tv_upper_bound(tv_ests, "target is 8 schools example")
 
 
 comp_names = [rf"$\theta_{j}$" for j in range(1,8+1) ]
 comp_names.extend([r"$\mu$", r"$\tau$"])
 
-long = read_good_sample_np_csv("8schools_long_chain_2025-03-16 Sun 20-14.csv", "8schools example")
-short = read_good_sample_np_csv("8schools_short_chain_2025-03-16 Sun 20-14.csv", "8schools example")
+# long = read_good_sample_np_csv("8schools_long_chain_2025-03-16 Sun 20-14.csv", "8schools example")
+# short = read_good_sample_np_csv("8schools_short_chain_2025-03-16 Sun 20-14.csv", "8schools example")
 
-for chain in [short, long]:
-    print(chain.shape)
-    quants = np.percentile(chain, [25, 50, 75], axis =0)
-    print(np.round(quants))
-    trace_plot_10_comps(chain, comp_names)
+# for chain in [short, long]:
+#     # print(chain.shape)
+#     quants = np.percentile(chain, [25, 50, 75], axis =0)
+#     # print(np.round(quants))
+#     trace_plot_10_comps(chain, comp_names)
 
-boxplot_two_chains_side_by_side(long[:,:8], short[:,:8], "long", "short", comp_names[:8]
-                                ,title = "Sample Distribution of group parameters")
-boxplot_two_chains_side_by_side(long[:,8:], short[:,8:], "long", "short", comp_names[8:]
-                                ,title = "Sample Distribution of population parameters")
+# boxplot_two_chains_side_by_side(long[:,:8], short[:,:8], "long", "short", comp_names[:8]
+#                                 ,title = "Sample Distribution of group parameters")
+# boxplot_two_chains_side_by_side(long[:,8:], short[:,8:], "long", "short", comp_names[8:]
+#                                 ,title = "Sample Distribution of population parameters")
+
+#read in TV est
+folder = "8schools example with rep"
+# tv_ests = read_demo_df_file("better_estimates_2chains_8schools TV est 2025-03-27 Thu 16-58.csv"
+#                             ,folder)
+
+# biggest_lag = str(max(int(col) for col in tv_ests.columns))
+# tv_bound = tv_ests[biggest_lag]
+# num_ts = len(tv_bound)
+
+# #the TV is non increasing so this is safe
+# t_short = tv_bound[tv_bound <=.25].first_valid_index()
+# if t_short is None:
+#     t_short = num_ts #not correct but surely wont happen
+# t_long = tv_bound[tv_bound <=(1-.99)].first_valid_index()
+# if t_long is None:
+#     t_long = num_ts #so things dont break if num_ts was too small
+# print(t_long, t_short)
+
+# seed = 2025
+# sample_size = 2_000
+# from generate_tau_samples import at2_8schools_coupled_mcmc
+# chain_l, _ = at2_8schools_coupled_mcmc(
+#         lag = 1, 
+#         random_state = seed
+#         , return_chain = True
+#         ,max_t_iterations = t_long+sample_size
+# )
+# chain_s, _ = at2_8schools_coupled_mcmc(
+#         lag = 1, 
+#         random_state = seed
+#         , return_chain = True
+#         ,max_t_iterations = t_short+sample_size
+# )
+# #discard burn in 
+# chain_l  = chain_l[t_long:]
+# chain_s = chain_s[t_short:]
+# print(chain_l.shape, chain_s.shape)
+
+# for c in (chain_l, chain_s):
+#     trace_plot_10_comps(c)
+# bp_est_l = read_good_sample_np_csv("8schools_rep_long_boxplot_mean_2025-04-14 Mon 17-15.csv", folder)
+# bp_est_s = read_good_sample_np_csv("8schools_rep_short_boxplot_mean_2025-04-14 Mon 17-15.csv", folder)
+# bp_est_l = make_boxplot_stats_from_quantiles(bp_est_l)
+# bp_est_s = make_boxplot_stats_from_quantiles(bp_est_s)
+
+# # boxplot_two_chains_side_by_side2(bp_est_l, bp_est_s, dim = 10)
+
+# bp_est_l = read_good_sample_np_csv("8schools_rep_long_boxplot_median_2025-04-14 Mon 17-15.csv", folder)
+# bp_est_s = read_good_sample_np_csv("8schools_rep_short_boxplot_median_2025-04-14 Mon 17-15.csv", folder)
+# bp_est_l = make_boxplot_stats_from_quantiles(bp_est_l)
+# bp_est_s = make_boxplot_stats_from_quantiles(bp_est_s)
+
+# # boxplot_two_chains_side_by_side2(bp_est_l, bp_est_s, dim = 10)
+
+
+# fl, fs = "8schools_rep_long_boxplot_median_2025-04-14 Mon 17-15.csv", "8schools_rep_short_boxplot_median_2025-04-14 Mon 17-15.csv"
+
+# group_l, group_s = make_boxplot_stats_from_quantiles(read_good_sample_np_csv(fl,folder)[:,:8]),make_boxplot_stats_from_quantiles(read_good_sample_np_csv(fs,folder)[:,:8])
+# boxplot_two_chains_side_by_side2(group_l, group_s, 8)
+
+# group_l, group_s = make_boxplot_stats_from_quantiles(read_good_sample_np_csv(fl,folder)[:,8:]),make_boxplot_stats_from_quantiles(read_good_sample_np_csv(fs,folder)[:,8:])
+# boxplot_two_chains_side_by_side2(group_l, group_s,2)
