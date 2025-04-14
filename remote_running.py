@@ -44,13 +44,13 @@ def run_2_chain_8schools():
         lag = 1, 
         random_state = 505
         , return_chain = True
-        ,max_t_iterations = t_long*chain_factor
+        ,max_t_iterations = t_long+chain_size
     )
     short, _ = at1_8schools_coupled_mcmc(
         lag = 1, 
         random_state = 505
         , return_chain = True
-        ,max_t_iterations = t_short*chain_factor
+        ,max_t_iterations = t_short+chain_size
     )
     remote_logger.info("writing chains to file")
 
@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
 
     remote_logger.info("\n") # add a line to seperate this execution from any others
-    better_estimates_2chains_8schools()
+    # better_estimates_2chains_8schools()
     # (good_mean,good_median), (bad_mean,bad_median) = better_estimates_2chains_8schools()
     # for good, bad  in [(good_mean, bad_mean),(good_median, bad_median)]:
     #     bxp_stats_good = make_boxplot_stats_from_quantiles(good)
@@ -232,7 +232,7 @@ if __name__ == "__main__":
     #     boxplot_two_chains_side_by_side2(bxp_stats_good,bxp_stats_bad
     #                                     ,"long", "short", dim =d)
     # get_tv_est_8schools()
-    # run_2_chain_8schools()
+    run_2_chain_8schools()
 
     # get_big_mcmc_sample()
     # # do not call sample_tau_L_for_many_lags outside of here 
