@@ -232,7 +232,7 @@ if __name__ == "__main__":
     #     boxplot_two_chains_side_by_side2(bxp_stats_good,bxp_stats_bad
     #                                     ,"long", "short", dim =d)
     # get_tv_est_8schools()
-    run_2_chain_8schools()
+    # run_2_chain_8schools()
 
     # get_big_mcmc_sample()
     # # do not call sample_tau_L_for_many_lags outside of here 
