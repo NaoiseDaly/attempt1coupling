@@ -71,7 +71,7 @@ def get_one_estimates_8schools(burn_in:int, n:int, seed:int):
         ,max_t_iterations = burn_in+n
     )
     #get different types of estimates
-    est_1 = make_boxplot_quantiles(chain)
+    est_1 = make_boxplot_quantiles(chain[burn_in:])
 
     return est_1
 
